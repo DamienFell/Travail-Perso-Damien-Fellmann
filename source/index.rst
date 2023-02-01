@@ -10,7 +10,7 @@ Résolution de sudokus par la programmation par contraintes
 ..  toctree::
     :maxdepth: 2
     :caption: Table des matières
-    :numbered 
+
 
     introduction.rst
     sandbox-sphynx.rst

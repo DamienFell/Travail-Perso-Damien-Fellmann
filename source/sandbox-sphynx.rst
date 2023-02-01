@@ -47,4 +47,5 @@ Blabla bla :math:`\sin^2(2x) = 2 `
 Code 
 ####
 
-.. litteralinclude:: scripts.codetest.py
+..  literalinclude:: scripts/codetest.py
+    :linenos:
