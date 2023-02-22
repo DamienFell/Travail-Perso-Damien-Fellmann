@@ -13,6 +13,7 @@ Résolution de sudokus par la programmation par contraintes
 
 
     introduction.rst
+    theorie-psc.rst
     sandbox-sphynx.rst
     conclusion.rst
     references.rst
