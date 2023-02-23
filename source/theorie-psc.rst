@@ -52,7 +52,8 @@ en descendant puis en remontant dans le graphe jusqu'à tomber sur la solution a
     Graphe d'une recherche en profondeur
 
 Dans un problème de satisfaction de contraintes, la profondeur des nœuds correspond au nombre de
-variables satisfaisant les contraintes. Lorsqu’aucune des valeurs du domaine d’une variable ne 
+variables satisfaisant les contraintes : on commence par tester une valeur pour une variable et on
+teste les valeurs pour les autres contraintes en descendant dans l'arbre de recherche. Lorsqu’aucune des valeurs du domaine d’une variable ne 
 peut coïncider avec leur contrainte, on remonte et on continue la recherche avec d’autres valeurs 
 de la variable du niveau de dessus et ainsi de suite.
 

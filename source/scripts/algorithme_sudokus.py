@@ -88,17 +88,16 @@ class ContrainteUnaire(Contrainte):
 class ContrainteBinaire(Contrainte):
     def __init__(self, refVar1, op, refVar2):
         Contrainte.__init__(self, [refVar1.nom,refVar2.nom])
-        self.refVar1 = refVar1 #Valeur de référence à droite de l'opérateur
-        self.op = op #Opérateur (<,<=,>,>=,==,!=)
-        self.refVar2 = refVar2 #Valeur de référence à gauchee de l'opérateur
+        self.refVar1 = refVar1 
+        self.op = op #
+        self.refVar2 = refVar2 
         
     def dimension(self):
-        return 2 #Car c'est une contrainte binaire
+        return 2 
     
     def estValide(self, var, val):
  
-        valeur = var.valeur #Sauvegarde la valeur actuelle de la variable var avant qu'elle soit modifiée
-        var.metAJourValeur(val)
+        valeur = var.valeur 
         valide = False
         
         if self.op == "<":
@@ -113,14 +112,10 @@ class ContrainteBinaire(Contrainte):
             valide = self.refVar1.valeur == self.refVar2.valeur
         elif self.op == "!=":
             valide = self.refVar1.valeur != self.refVar2.valeur
-        elif self.op == "NAND":
-            valide = not(self.refVar1.valeur == True and self.refVar2.valeur == True)
-        elif self.op == "->":
-            valide = (self.refVar1.valeur == False and self.refVar2.valeur == True)
         else :
             print(f"Opérateur : {self.op}, non implémenté")
             
-        var.metAJourValeur(valeur) #Annule la sauvegarde de la valeur val dans la variable
+        var.metAJourValeur(valeur) 
         
         return valide        
 
@@ -155,15 +150,15 @@ class ContrainteBinaire(Contrainte):
 class Variables :
     def __init__(self):
         self.variables = []
-    
-    def retourneVar(self, nom): #Retourne une variable d'après son nom
+
+    def ajouteVar(self, var): 
+        self.variables.append(var)
+
+    def retourneVar(self, nom): 
         for var in self.variables :
             if var.nomEstEgal(nom) :
                 return var
         return None
-    
-    def ajouteVar(self, var): #Ajoute une nouvelle variable dans la liste des variables
-        self.variables.append(var)
     
     def consistanceDesNoeuds(self, contraintes): #Pour chaque contrainte unaire, on supprime des domaine des variable les valeurs qui ne respectent pas la contrainte
         for c in contraintes:
@@ -186,7 +181,7 @@ class Contraintes :
         self.contraintes = []
         self.contraintes_noms = []
     
-    def ajouteContrainte(self, c): #Ajoute une nouvelle contrainte dans la liste des contraintes
+    def ajouteContrainte(self, c): 
         self.contraintes.append(c)
         self.contraintes_noms.append(repr(c))
     
@@ -201,7 +196,7 @@ class Contraintes :
     def retourneNbContraintes(self) : #Retourne le nombre de contraintes
         return len(self.contraintes)
     
-    def representation(self):
+    def __repr__(self):
         str = "Contraintes : \n"
         for c in self.contraintes :
             str += "\t" + c.__repr__() + "\n"
