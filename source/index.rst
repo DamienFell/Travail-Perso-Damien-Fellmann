@@ -14,6 +14,7 @@ Résolution de sudokus par la programmation par contraintes
 
     introduction.rst
     theorie-psc.rst
+    Implémentation en python.rst
     sandbox-sphynx.rst
     conclusion.rst
     references.rst

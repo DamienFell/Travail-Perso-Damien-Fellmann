@@ -16,10 +16,10 @@ class Variable :
         if d in self.label :
             self.label.remove(d)
             
-    def metAJourValeur(self, valeur) : #Met à jour la valeur de la variable
+    def metAJourValeur(self, valeur) : 
         self.valeur = valeur
         
-    def nomEstEgal(self, nom): # Vérifie que le nom de la variable est le même que celui passé en paramètre
+    def nomEstEgal(self, nom):
         return self.nom == nom
     
     def tailleDuDomaine(self): # Retourne la taille du domaine
@@ -28,37 +28,37 @@ class Variable :
     def tailleDuLabel(self): # Retourne la taille du label
         return len(self.label)
     
-    def __repr__(self): #Retourne la représentation sous format str de la variable
+    def __repr__(self): 
         string =f"{self.nom} : valeur : {self.valeur}, domaine : {self.domaine}"
         return string
 
 class Contrainte:
     def __init__(self, variables):
-        self.variables = variables #Liste des noms des variables sur laquelle porte la contrainte
+        self.variables = variables 
         
-    def dimensions(self): #retourne la dimension de la contrainte : le nombre de variables sur laquelle porte la contrainte
+    def dimension(self): 
         return 0
     
-    def estValide(self, var, val): #Teste si la variable var avec la valeur val respecte la contrainte
+    def estValide(self, var, val):
         return False
     
-    def __repr__(self): #Retourne la représentation sous format str de la contrainte
+    def __repr__(self): 
         string = f"Contrainte : variables = {self.variables}"
         return string
         
 class ContrainteUnaire(Contrainte):
     def __init__(self, refVar, op, ref):
         Contrainte.__init__(self, [refVar.nom])
-        self.op = op #Opérateur (<,<=,>,>=,==,!=)
-        self.ref = ref #Valeur de référence pour l'opérateur
-        self.refVar = refVar #Variable impliquée dans la contrainte
+        self.op = op 
+        self.ref = ref 
+        self.refVar = refVar 
     
     def dimension(self) :
-        return 1 #Car c'est une contrainte unaire
+        return 1 
     
     def estValide(self, var, val):
   
-        valeur = var.valeur #Sauvegarde la valeur actuelle de la variable var avant qu'elle soit modifiée
+        valeur = var.valeur  
         var.metAJourValeur(val)
         valide = False
         
@@ -77,7 +77,7 @@ class ContrainteUnaire(Contrainte):
         else :
             print(f"Opérateur : {self.op}, non implémenté")
             
-        var.metAJourValeur(valeur) #Annule la sauvegarde de la valeur val dans la variable
+        var.metAJourValeur(valeur) 
         
         return valide
     
