@@ -210,8 +210,8 @@ def afficheSolution(algo, solution) :
 def afficheNbIterations(algo, iterations):
     print(f"Nombre d'itérations avec l'algorithme {algo} : {str(iterations)}" )
 
-def consistanceAvecVarsPrecedentes(k, contraintes, variables): #Vérifie si chaque contrainte portant sur la variable k 
-    for c in contraintes :                                     #et sur au moins une des variables précédentes est satisfaite
+def consistanceAvecVarsPrecedentes(k, contraintes, variables): 
+    for c in contraintes :                                
         if variables[k].nom in c.variables:
             for i in range(0,k+1):
                 if variables[i].nom in c.variables :
@@ -226,7 +226,7 @@ def backtrack(k, contraintes, variables, iterations = 0): #k : indice de la vari
     
     iterations +=1
     
-    if k>=len(variables): #si la dernière variable a été trouvée, on affiche la solution trouvée et l'ajoute à la liste des solutions
+    if k>=len(variables):
         
         afficheNbIterations(algo,iterations)
         
@@ -236,19 +236,19 @@ def backtrack(k, contraintes, variables, iterations = 0): #k : indice de la vari
             solution[var.nom]=var.valeur
         
         #afficheSolution(algo,solution) 
-        
+
         return solution
     
     else :
         var = variables[k]
         
-        for val in var.domaine: #teste toutes les valeurs du domaine
+        for val in var.domaine: 
             var.metAJourValeur(val)
             if consistanceAvecVarsPrecedentes(k, contraintes, variables): #Si la consistance est valide, on continue l'algorithme sur la variable k+1
                 reste = backtrack(k+1, contraintes, variables, iterations)
                 if reste != "echec":
                     return reste
-    #Si aucune valeur n'est consistante à cette étape, on retourne à l'étape précédente sans avoir attribué de valeur à la variable actuelle
+    
     var.metAJourValeur(None)
     return "echec"    
 

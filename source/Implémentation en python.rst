@@ -77,9 +77,53 @@ Algorithme de backtrack
 =======================
 
 Aprés avoir défini ces quatre classes, nous pouvons implémenter l'algorithme de recherche en profondeur d'abord 
-dans la fonction *backtrack*. Cette fonction est récursive : à mesure qu'on progresse dans notre arbre de recherche,
-on la rappelle. Le premier paramètre *k* correspond à l'indice de la variable actuelle sur laquelle on teste les valeurs.
+dans la fonction *backtrack*. D'abord, le premier paramètre *k* correspond à l'indice de la variable actuelle 
+sur laquelle on teste les valeurs. Lorsqu'on teste les valeurs de la variable suivante, on rappelle la fonction
+avec *k+1* en paramètre : cette fonction est donc récursive. Mais avant d'être rappelée, elle fait appel à la 
+fonction *consistanceAvecVarsPrecedentes* qui est au coeur du fonctionnement de l'algorithme. Elle passe en revue 
+toutes les contraintes portant sur la variable d'indice *k* et sur les variables d'indice plus petit que *k*
+précédemment instanciées et teste si la combinaison des valeurs attribuées est consistante, c'est à dire si elle 
+respecte ces contraintes. C'est donc seulement si toutes ces contraintes sont respectées qu'on peut passer à l'attribution
+de la valeur de la variable d'indice *k+1*. Si le programme arrive à donner une valeur à la dernière variable
+qui est consistante avec toutes les valeurs des autresvariables, cela signifie qu'on a trouvé une solution au problème et on 
+retourne un dictionnaire contenant les noms des variables et leur valeur. Cependant, si aucune combinaison ne 
+fonctionne, l'algorithme retourne "echec".
 
+..  literalinclude:: scripts/algorithme_sudokus.py
+    :lines: 213-224, 227-237, 240-253
+    :linenos:
 
 Application à la résolution de sudokus
 ======================================
+
+Afin de résoudre des sudokus à l'aide de l'algorithme de backtrack précédemment implémenté, nous
+devons définir les variables, leurs domaines et les contraintes du problème. Les variables correspondent
+aux cases vides des grilles de sudokus. Leur domaine est le même pour toutes et est les nombres entre 1 
+et la taille de la grille (9 habituellement). Ce sont des contraintes d'inégalités qui définissent
+les relations des variables entre elles et des variables avec les cases déjà numérotées : chaque case
+d'une même ligne, d'une même colonne ou d'un même carré ne soit pas avoir la même valeur qu'une autre.
+
+La fonction que nous allons développer prend en paramètre une grille sous forme de liste de listes sont 
+les lignes de la grille, avec des "x" pour les valeurs inconnues, et retourne grille complétée sous ¨
+le même format.
+
+La première étape consiste alors à implémenter les fonctions *lignes*, *colonnes* et *carres* qui
+retourne des listes de listes qui sont les lignes, colonnes ou carrés de la grille.
+
+..  literalinclude:: scripts/algorithme_sudokus.py
+    :lines: 271-293
+    :linenos:
+
+Ensuite, à partir de la grille de sudoku, on peut créer les variables pour chaque case contenant un 
+"x". Leur nom est composé de l'indice *i* de la ligne et de l'indice *j* de la colonne d'où elles se 
+trouvent dans la grille. En plus de créer ces variables et des les ajouter à la liste des variables 
+(contenue dans une instanciation de la classe **Variables**), on remplace également les "x" de la grille
+par les noms des variables.
+
+..  literalinclude:: scripts/algorithme_sudokus.py
+    :lines: 295-303
+    :linenos:
+
+..  literalinclude:: scripts/algorithme_sudokus.py
+    :lines: 305-322
+    :linenos:

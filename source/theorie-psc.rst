@@ -53,9 +53,9 @@ en descendant puis en remontant dans le graphe jusqu'à tomber sur la solution a
 
 Dans un problème de satisfaction de contraintes, la profondeur des nœuds correspond au nombre de
 variables satisfaisant les contraintes : on commence par tester une valeur pour une variable et on
-teste les valeurs pour les autres contraintes en descendant dans l'arbre de recherche. Lorsqu’aucune des valeurs du domaine d’une variable ne 
+teste les valeurs pour les autres variables en descendant dans l'arbre de recherche. Lorsqu’aucune des valeurs du domaine d’une variable ne 
 peut coïncider avec leur contrainte, on remonte et on continue la recherche avec d’autres valeurs 
-de la variable du niveau de dessus et ainsi de suite.
+de la variable du niveau de dessus et ainsi de suite. 
 
 Le PSC de la figure 1 peut ainsi être résolu de la manière suivante (les \* représentent les 
 situations où aucune valeur du domaine d'une variable ne satisfait les contraintes et on procède 
