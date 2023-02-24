@@ -90,7 +90,7 @@ retourne un dictionnaire contenant les noms des variables et leur valeur. Cepend
 fonctionne, l'algorithme retourne "echec".
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 213-224, 227-237, 240-253
+    :lines: 213-224,229, 233-237, 240-253
     :linenos:
 
 Application à la résolution de sudokus
@@ -116,7 +116,7 @@ retourne des listes de listes qui sont les lignes, colonnes ou carrés de la gri
 
 Ensuite, à partir de la grille de sudoku, on peut créer les variables pour chaque case contenant un 
 "x". Leur nom est composé de l'indice *i* de la ligne et de l'indice *j* de la colonne d'où elles se 
-trouvent dans la grille. En plus de créer ces variables et des les ajouter à la liste des variables 
+trouvent dans la grille. En plus de créer ces variables et de les ajouter à la liste des variables 
 (contenue dans une instanciation de la classe **Variables**), on remplace également les "x" de la grille
 par les noms des variables.
 
@@ -124,6 +124,47 @@ par les noms des variables.
     :lines: 295-303
     :linenos:
 
+Pour instancier les contraintes, on implémente la fonction *creation_des_contraintes* qui prend dans le
+paramètre *grille* soit la liste des lignes, soit celle des colonnes, soit celle des carrés générées par
+les fonctions précédemment définies. Pour chaque case qui contient un nom de variable, on crée les
+contraintes unaires portant sur cette variable (par rapport aux cases de la même "ligne" 
+contenant un chiffre) et les contraintes binaires portant sur elle et une autre variable de la "ligne". 
+De plus, afin d'éviter de créer des contraintes identiques, une copie de la ligne actuelle *ligne2* est 
+créée et lorsqu'on instancie les contraintes d'une variable, on la supprime de *ligne2*.
+On contrôle également que chaque contrainte ne se trouve pas déjà dans la liste
+des contraintes (cette étape est surtout nécessaire lorsqu'on rajoute les contraintes issues des carrés qui 
+ont souvent déjà été ajoutées lors des appels de la fonction avec les lignes et les colonnes).
+
 ..  literalinclude:: scripts/algorithme_sudokus.py
     :lines: 305-322
+    :linenos:
+
+Puis, la fonction *creation_de_toutes_les_contraintes* génère l'ensemble des 
+contraintes en appelant d'abord la fonction *creation_des_variables* pour  
+instancier les variables et créer la nouvelle grille contenant le nom de ces
+dernières, ainsi qu'en créant 
+les listes des lignes, colonnes et carrés avec lesquelles peuvent être générées 
+toutes les contraintes. 
+
+..  literalinclude:: scripts/algorithme_sudokus.py
+    :lines: 324-334
+    :linenos:
+
+Finalement, il est l'heure de définir la fonction *solution_sudoku* qui peut
+résoudre tout sudoku réalisable. On commence par créer des instances des classes
+**Contraintes** et **Variables**. Ensuite, on contrôle que la grille de sudoku 
+est dans les normes avec les fonctions *grille_valide*, qui vérifie si chaque ligne
+a le même nombre d'éléments que la grille a de lignes, et *grille_de_vrai_sudoku*,
+qui teste si le nombre de lignes est un carré parfait (car le nombre de carrés 
+dans une grille de sudoku correspond à la racine carrées du nombre de lignes) 
+(on admet donc pas seulement des grilles 9x9 mais aussi par exemple des grilles
+16x16). Puis, on appelle la fonction *creation_de_toutes_les_contraintes* qui appelle
+aussi la fonction *creation_des_variables* pour ensuite utiliser l'algorithme
+de recherche en profondeur d'abord *backtrack* qui prend en paramètre la grille ainsi
+que les listes de variables et de contraintes. Si la recherche a été fructueuse, on
+insère les valeurs valides des variables dans la grille et on l'imprime, sinon on 
+imprime un message indiquant que le sudoku ne peut pas être résolu.
+
+..  literalinclude:: scripts/algorithme_sudokus.py
+    :lines: 260-270, 339-360
     :linenos:

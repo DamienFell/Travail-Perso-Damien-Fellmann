@@ -228,7 +228,7 @@ def backtrack(k, contraintes, variables, iterations = 0): #k : indice de la vari
     
     if k>=len(variables):
         
-        afficheNbIterations(algo,iterations)
+        #afficheNbIterations(algo,iterations)
         
         solution = {}
         
@@ -323,9 +323,6 @@ def creation_des_contraintes(grille, contraintes, variables):
                         
 def creation_de_toutes_les_contraintes(grille, contraintes, variables):
     
-    if not grille_valide(grille) or not grille_de_vrai_sudoku(grille):
-        raise Exception("La grille n'est pas valide")
-    
     grille = creation_des_variables(grille, variables)
     
     Lignes = lignes(grille)
@@ -339,24 +336,30 @@ def creation_de_toutes_les_contraintes(grille, contraintes, variables):
     #variables.consistanceDesNoeuds(contraintes.contraintes)
     #contraintes.consistanceDesArcs()
 
-def solution_sudokus(grille):
-       
+def solution_sudoku(grille):      
     contraintes = Contraintes()
     variables = Variables()
     
+    if not grille_valide(grille) or not grille_de_vrai_sudoku(grille):
+        raise Exception("La grille n'est pas valide")
+
     creation_de_toutes_les_contraintes(grille, contraintes, variables)
     
     sol = backtrack(0,contraintes.contraintes,variables.variables)
     
-    for var in variables.variables:
-        i = int(var.nom[4])
-        j = int(var.nom[6])
-        
-        grille[i][j] = var.valeur
+    if not sol == "echec":        
+        for var in variables.variables:
+                i = int(var.nom[4])
+                j = int(var.nom[6])
+                
+                grille[i][j] = var.valeur
+            
+        print(grille)
     
-    print(grille)
-
-grille1=[[1,"x",3,"x"],["x",3,2,"x"],[3,"x","x",2],[2,"x","x","x"]]
+    else :
+        print("Ce sudoku n'a pas de solution")
+    
+grille1=[[1,"x",3,4],[1,"x",3,4],[1,"x",3,4],[1,"x",3,4]]
 grille2 = [[5,4,"x","x",2,"x",8,"x",6],
            ["x",1,9,"x","x",7,"x","x",3],
            ["x","x","x",3,"x","x",2,1,"x"],
@@ -369,5 +372,7 @@ grille2 = [[5,4,"x","x",2,"x",8,"x",6],
            ]
 
 
-solution_sudokus(grille2)
+solution_sudoku(grille2)
+solution_sudoku(grille1)
+
 
