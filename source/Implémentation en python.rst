@@ -24,7 +24,7 @@ Deuxièmement, la classe **Contrainte** doit aussi être définie. Cependant, el
 et sera héritée par les classes plus spécifiques **ContrainteUnaire** et **ContrainteBinaire**. Son unique attibut 
 *variables* contient la liste des noms des variables sur lesquelles porte la contrainte. Sa méthode *dimension* retourne 
 le nombre de variables sur lesquelles elle agit, *estValide* teste si la contrainte est respectée en choisissant la 
-valeur *val* pour la vairable *val* et *__repr__* retourne la représentation sous format str de la contrainte.
+valeur *val* pour la variable *var* et *__repr__* retourne la représentation sous format str de la contrainte.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
     :lines: 35-47
@@ -37,14 +37,14 @@ paramètre lors de l'instanciation. Cette classe contient également les attirbu
 de la classe **Contrainte** : *dimension* retourne logiquement 1 et *__repr__* retourne la variable impliquée,
 l'opérateur et la valeur de référence. Pour la méthode *estValide*, on doit d'abord stocker la valeur actuelle de la variabe 
 et la mettre à jour avec la valeur rentrée en paramètre. Ensuite, on teste cette valeur par rapport 
-à l'opérateur et la valeur de référence. Finalement, il faut remettre à jour la valeur initiale de la variable.
+à l'opérateur et à la valeur de référence. Finalement, il faut remettre à jour la valeur initiale de la variable.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 49-86
+    :lines: 49-59, 61-86
     :linenos:
 
 On implémente la classe **ContrainteBinaire** de manière semblable à la classe **ContrainteUnaire**. Cette fois, 
-la liste des variables contiendra les noms des variable *refVar1* et *refVar2*. Les attributs sont ces deux variables ainsi
+la liste des variables contiendra les noms des variables *refVar1* et *refVar2*. Les attributs sont ces deux variables ainsi
 que l'opérateur *op* et la dimension de ces contraintes est de 2. Le fonctionnement des méthodes reste le même
 à la différence que la valeur de référence *ref* est remplacée par la valeur de la variable *refVar2* dans la méthode
 *estValide*.
@@ -54,7 +54,7 @@ que l'opérateur *op* et la dimension de ces contraintes est de 2. Le fonctionne
     :linenos:
 
 A présent, il s'agit d'implémenter la classe **Variables** qui gère l'ensemble des variables présentes dans un 
-problème de satisfaction de contraintes. Elle possède un seul attibut : la liste des variables, vides lors de 
+problème de satisfaction de contraintes. Elle possède un seul attibut : la liste des variables, vide lors de 
 l'instanciation. Afin de la remplir, on utilise la méthode *ajouteVar*. Puis, *retourneVar* permet de retourner 
 une variable d'aprés son nom. La méthode *__repr__* quant à elle retourne une chaîne de caractères contenant toutes
 les informations sur chaque variable.
@@ -65,9 +65,9 @@ les informations sur chaque variable.
 
 Comme pour les variables, on définit également une classe **Contraintes** qui s'occupe de l'ensemble des contraintes 
 du PSC. Ses attributs *contraintes* et *contraintes_noms* contiennent toutes les contraintes et leur nom et sont 
-également vide au départ. Lorsqu'une contrainte est ajoutée avec *ajouteContrainte*, on doit donc aussi rajouter 
+également vides au départ. Lorsqu'une contrainte est ajoutée avec *ajouteContrainte*, on doit donc aussi rajouter 
 son nom dans la liste *contraintes_noms*. Finalement, la méthode *__repr__* est semblable à celle de la classe 
-**Variables**
+**Variables**.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
     :lines: 180-187, 199-204
@@ -85,13 +85,18 @@ toutes les contraintes portant sur la variable d'indice *k* et sur les variables
 précédemment instanciées et teste si la combinaison des valeurs attribuées est consistante, c'est à dire si elle 
 respecte ces contraintes. C'est donc seulement si toutes ces contraintes sont respectées qu'on peut passer à l'attribution
 de la valeur de la variable d'indice *k+1*. Si le programme arrive à donner une valeur à la dernière variable
-qui est consistante avec toutes les valeurs des autresvariables, cela signifie qu'on a trouvé une solution au problème et on 
+qui est consistante avec toutes les valeurs des autres variables, cela signifie qu'on a trouvé une solution au problème et on 
 retourne un dictionnaire contenant les noms des variables et leur valeur. Cependant, si aucune combinaison ne 
 fonctionne, l'algorithme retourne "echec".
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
     :lines: 213-224,229, 233-237, 240-253
     :linenos:
+
+Algorithme de forwardchecking
+=============================
+
+Chapitre pas encore écrit
 
 Application à la résolution de sudokus
 ======================================
@@ -101,10 +106,10 @@ devons définir les variables, leurs domaines et les contraintes du problème. L
 aux cases vides des grilles de sudokus. Leur domaine est le même pour toutes et est les nombres entre 1 
 et la taille de la grille (9 habituellement). Ce sont des contraintes d'inégalités qui définissent
 les relations des variables entre elles et des variables avec les cases déjà numérotées : chaque case
-d'une même ligne, d'une même colonne ou d'un même carré ne soit pas avoir la même valeur qu'une autre.
+d'une même ligne, d'une même colonne ou d'un même carré ne doit pas avoir la même valeur qu'une autre.
 
-La fonction que nous allons développer prend en paramètre une grille sous forme de liste de listes sont 
-les lignes de la grille, avec des "x" pour les valeurs inconnues, et retourne grille complétée sous ¨
+La fonction que nous allons développer prend en paramètre une grille sous forme de liste de listes qui sont 
+les lignes de la grille, avec des "x" pour les valeurs inconnues, et retourne la grille complétée sous 
 le même format.
 
 La première étape consiste alors à implémenter les fonctions *lignes*, *colonnes* et *carres* qui
@@ -136,7 +141,7 @@ des contraintes (cette étape est surtout nécessaire lorsqu'on rajoute les cont
 ont souvent déjà été ajoutées lors des appels de la fonction avec les lignes et les colonnes).
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 305-322
+    :lines: 306-322
     :linenos:
 
 Puis, la fonction *creation_de_toutes_les_contraintes* génère l'ensemble des 
@@ -157,7 +162,7 @@ est dans les normes avec les fonctions *grille_valide*, qui vérifie si chaque l
 a le même nombre d'éléments que la grille a de lignes, et *grille_de_vrai_sudoku*,
 qui teste si le nombre de lignes est un carré parfait (car le nombre de carrés 
 dans une grille de sudoku correspond à la racine carrées du nombre de lignes) 
-(on admet donc pas seulement des grilles 9x9 mais aussi par exemple des grilles
+(on n'admet donc pas seulement des grilles 9x9 mais aussi par exemple des grilles
 16x16). Puis, on appelle la fonction *creation_de_toutes_les_contraintes* qui appelle
 aussi la fonction *creation_des_variables* pour ensuite utiliser l'algorithme
 de recherche en profondeur d'abord *backtrack* qui prend en paramètre la grille ainsi
@@ -166,5 +171,5 @@ insère les valeurs valides des variables dans la grille et on l'imprime, sinon 
 imprime un message indiquant que le sudoku ne peut pas être résolu.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 260-270, 339-360
+    :lines: 260-270, 339-359
     :linenos:

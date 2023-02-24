@@ -95,9 +95,9 @@ class ContrainteBinaire(Contrainte):
     def dimension(self):
         return 2 
     
-    def estValide(self, var, val):
- 
+    def estValide(self, var, val): 
         valeur = var.valeur 
+        var.metAJourValeur(val)
         valide = False
         
         if self.op == "<":
@@ -302,14 +302,14 @@ def creation_des_variables(grille, variables):
                 grille[i][j] = f"var({i},{j})"
     return grille
 
+
 def creation_des_contraintes(grille, contraintes, variables):
     for ligne in grille :
-        ligne2=ligne.copy() #Création d'une copie de la ligne qui peut être modifiée mais qui n'affectera pas la ligne originale
+        ligne2=ligne.copy()
         for x in ligne :
-            if not type(x) is int : #si la case est ne contient pas encore de chiffre
+            if not type(x) is int :
                 var = variables.retourneVar(x)
-                ligne2.remove(x) #on enlève la variable en question pour ne pa générer
-                                #de contrainte avec elle-même et ne pas avoir 2 contraintes identiques 
+                ligne2.remove(x)                                
                 for y in ligne2 :
                     if type(y) is int:
                         contrainte = ContrainteUnaire(var,"!=",y)
@@ -351,7 +351,6 @@ def solution_sudoku(grille):
         for var in variables.variables:
                 i = int(var.nom[4])
                 j = int(var.nom[6])
-                
                 grille[i][j] = var.valeur
             
         print(grille)
