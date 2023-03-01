@@ -1,78 +1,60 @@
-# Makefile for Sphinx documentation
+# Minimal makefile for Sphinx documentation
 #
 
-# You can set these variables from the command line.
-SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build -E
-PAPER         =
+# You can set these variables from the command line, and also
+# from the environment for the first two.
+SPHINXOPTS    ?=
+SPHINXBUILD   ?= sphinx-build
+SOURCEDIR     = source
 BUILDDIR      = build
 
-LATEX-BW      = $(BUILDDIR)/latex-bw
-LATEX-NAME = music-for-geeks-and-nerds
+TARGET = travail-perso
 
-# Internal variables.
-PAPEROPT_a4     = -D latex_paper_size=a4
-PAPEROPT_letter = -D latex_paper_size=letter
-ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
-SAMPLEOPTS = -D html_theme=sample
+PDFVIEWER = explorer.exe
 
-PAPEROPTS = -D latex_elements.pointsize=11pt -D latex_elements.preamble=\\usepackage{mfgan-bw} -D pygments_style=bw -D black_and_white=True -D code_example_wrap=67 -D latex_show_pagerefs=True
+# Put it first so that "make" without argument is like "make help".
+help:
+	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-SCREENOPTS = -D latex_elements.pointsize=12pt -D latex_elements.classoptions=,openany,oneside -D latex_elements.preamble=\\usepackage{mfgan} -D pygments_style=my_pygment_style.BookStyle -D code_example_wrap=67
+.PHONY: help Makefile
 
-MOBIOPTS = -D pygments_style=none
-MOBI_NAME = MusicforGeeksandNerds.mobi
+# Catch-all target: route all unknown targets to Sphinx using the new
+# "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
+%: Makefile
+	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-# the i18n builder cannot share the environment and doctrees with the others
-I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
+livehtml:
+	sphinx-autobuild "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-.PHONY: default view clean html epub mobi latex pdf pdf-bw text
 
-default: html
+livepdf:
+	watchmedo shell-command \
+		--patterns="*.png;*.rst;*.md;conf.py" \
+		--recursive \
+		--command='make tmpdf && make getpdf'	
+surge:
+	surge build/html/ ini-prog.surge.sh
 
-all: html epub mobi pdf pdf-bw sample
+		
+spelling:
+	@echo Serving pages on $(SPHINX_URL)
+	sphinx-build -b spelling -d build/doctrees   source $(BUILDDIR)/spelling
 
 view:
-	open build/html/index.html
+	$(PDFVIEWER) ./build/latex/$(TARGET).pdf
 
-clean:
-	-rm -rf $(BUILDDIR)/*
+tmpdf:
+	make latex
+	# curl https://gist.githubusercontent.com/donnerc/ceb6e0045d108f41e702/raw/sphinxmanual.cls > build/latex/sphinxmanual.cls
+	# curl
+	# https://gist.githubusercontent.com/donnerc/ceb6e0045d108f41e702/raw/Makefile
+	# > build/latex/Makefile
+	cp -f latex-templates/Makefile $(BUILDDIR)/latex
+	cp -f latex-templates/sphinxmanual.cls $(BUILDDIR)/latex
+	cd build/latex/ && make
 
-html:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+getpdf:
+	cp -f build/latex/$(TARGET).pdf .
 
-epub:
-	$(SPHINXBUILD) -b epub2 $(ALLSPHINXOPTS) $(BUILDDIR)/epub
-
-mobi:
-	$(SPHINXBUILD) -b mobi -t mobi $(MOBIOPTS) $(ALLSPHINXOPTS) $(BUILDDIR)/mobi
-#	cd $(BUILDDIR)/mobi && kindlegen content.opf -o $(MOBI_NAME)
-
-kindle-sync:
-	cp $(BUILDDIR)/mobi/$(MOBI_NAME) /Volumes/Kindle/documents/
-	diskutil eject /Volumes/Kindle/
-
-latex:
-	$(SPHINXBUILD) -b latex $(SCREENOPTS) $(ALLSPHINXOPTS) $(BUILDDIR)/latex
-
-pdf:
-	$(SPHINXBUILD) -b latex $(SCREENOPTS) $(ALLSPHINXOPTS) $(BUILDDIR)/latex
-	sed -i .bak -f process-latex $(BUILDDIR)/latex/$(LATEX-NAME).tex
-	rsync -a latex/ $(BUILDDIR)/latex/
-	$(MAKE) -C $(BUILDDIR)/latex pdf
-
-pdf-bw:
-	$(SPHINXBUILD) -b latex -t black_and_white $(PAPEROPTS) $(ALLSPHINXOPTS) $(LATEX-BW)
-	sed -i .bak -f process-latex $(LATEX-BW)/$(LATEX-NAME).tex
-	sed -i .bak '/\\setcounter{page}{1}/d' $(LATEX-BW)/sphinxmanual.cls
-	rsync -a latex/ $(LATEX-BW)/
-	$(MAKE) -C $(LATEX-BW)/ pdf
-
-sample:
-	$(SPHINXBUILD) -b latex -t sample $(SCREENOPTS) $(ALLSPHINXOPTS) $(BUILDDIR)/sample
-	sed -i .bak -f process-latex $(BUILDDIR)/sample/$(LATEX-NAME).tex
-	rsync -a latex/ $(BUILDDIR)/sample/
-	cp figs-pdf/stamp*.pdf $(BUILDDIR)/sample/
-	$(MAKE) -C $(BUILDDIR)/sample pdf
-	# chapter 1, 3, 5
-	pdftk A=$(BUILDDIR)/sample/$(LATEX-NAME).pdf cat A1-6 A21-25 A45-48 A84 output $(BUILDDIR)/sample/$(LATEX-NAME)-sample.pdf	
+surge: html
+	surge build/html gyminf-ads2-dp.surge.sh
