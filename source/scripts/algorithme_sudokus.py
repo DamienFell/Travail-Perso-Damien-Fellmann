@@ -1,54 +1,57 @@
+from abc import ABC, abstractmethod
 import copy
 import math
 
 class Variable :
-    def __init__(self, nom, domaine):
+    def __init__(self, nom, domaine, valeur = None):
         self.nom = nom
         self.domaine = domaine
-        self.valeur = None
+        self.valeur = valeur
         self.label = []
-        self.initLabel()
+        self.init_label()
     
-    def initLabel(self): #(Ré)Initialise le label
+    def init_label(self): #(Ré)Initialise le label
         self.label =copy.deepcopy(self.domaine)
         
-    def enleveDuLabel(self, d): #Efface la valeur d du label
+    def enleve_du_label(self, d): #Efface la valeur d du label
         if d in self.label :
             self.label.remove(d)
             
-    def metAJourValeur(self, valeur) : 
+    def met_a_jour_valeur(self, valeur) : 
         self.valeur = valeur
         
-    def nomEstEgal(self, nom):
+    def nom_est_egal(self, nom):
         return self.nom == nom
     
-    def tailleDuDomaine(self): # Retourne la taille du domaine
+    def taille_du_domaine(self): # Retourne la taille du domaine
         return len(self.domaine)
     
-    def tailleDuLabel(self): # Retourne la taille du label
+    def taille_du_label(self): # Retourne la taille du label
         return len(self.label)
     
     def __repr__(self): 
-        string =f"{self.nom} : valeur : {self.valeur}, domaine : {self.domaine}"
+        string =f"Variable(nom={self.nom}, domaine={self.domaine}, valeur={self.valeur}) "
         return string
 
-class Contrainte:
+class Contrainte(ABC):
     def __init__(self, variables):
         self.variables = variables 
-        
+
+    @abstractmethod    
     def dimension(self): 
-        return 0
+        pass
     
-    def estValide(self, var, val):
-        return False
+    @abstractmethod
+    def est_valide(self, var, val):
+        pass
     
+    @abstractmethod
     def __repr__(self): 
-        string = f"Contrainte : variables = {self.variables}"
-        return string
+        pass
         
-class ContrainteUnaire(Contrainte):
+class Contrainte_unaire(Contrainte):
     def __init__(self, refVar, op, ref):
-        Contrainte.__init__(self, [refVar.nom])
+        Contrainte.__init__(self, [refVar])
         self.op = op 
         self.ref = ref 
         self.refVar = refVar 
@@ -56,10 +59,9 @@ class ContrainteUnaire(Contrainte):
     def dimension(self) :
         return 1 
     
-    def estValide(self, var, val):
-  
+    def est_valide(self, var, val):
         valeur = var.valeur  
-        var.metAJourValeur(val)
+        var.met_a_jour_valeur(val)
         valide = False
         
         if self.op == "<":
@@ -77,17 +79,17 @@ class ContrainteUnaire(Contrainte):
         else :
             print(f"Opérateur : {self.op}, non implémenté")
             
-        var.metAJourValeur(valeur) 
+        var.met_a_jour_valeur(valeur) 
         
         return valide
     
     def __repr__(self) :
-        string = f"Contrainte unaire : variable = {self.refVar}, opérateur : {self.op}, valeur de référence : {self.ref}"
+        string = f"Contrainte_unaire(refVar={self.refVar}, op={self.op}, ref={self.ref})"
         return string
             
-class ContrainteBinaire(Contrainte):
+class Contrainte_binaire(Contrainte):
     def __init__(self, refVar1, op, refVar2):
-        Contrainte.__init__(self, [refVar1.nom,refVar2.nom])
+        Contrainte.__init__(self, [refVar1,refVar2])
         self.refVar1 = refVar1 
         self.op = op #
         self.refVar2 = refVar2 
@@ -95,9 +97,9 @@ class ContrainteBinaire(Contrainte):
     def dimension(self):
         return 2 
     
-    def estValide(self, var, val): 
+    def est_valide(self, var, val): 
         valeur = var.valeur 
-        var.metAJourValeur(val)
+        var.met_a_jour_valeur(val)
         valide = False
         
         if self.op == "<":
@@ -115,20 +117,20 @@ class ContrainteBinaire(Contrainte):
         else :
             print(f"Opérateur : {self.op}, non implémenté")
             
-        var.metAJourValeur(valeur) 
+        var.met_a_jour_valeur(valeur) 
         
         return valide        
 
     def __repr__(self) :
-        string = f"Contrainte binaire : variables = {self.refVar1} et {self.refVar2}  , opérateur : {self.op}"
+        string = f"Contrainte_binaire(refVar1={self.refVar1}, op={self.op}, refVar2={self.refVar2})"
         return string
 
-    def estPossible(self, var): #Détermine si la contrainte peut être satisfaite pour au moins une valeur du domaine
+    def est_possible(self, var): #Détermine si la contrainte peut être satisfaite pour au moins une valeur du domaine
         if len(var.domaine) == 0:
             return False
         
         for d in var.domaine:
-            if self.estValide(var, d):
+            if self.est_valide(var, d):
                 return True #sSi au moins une valeur convient
         
         return False #Si aucune valeur ne convient
@@ -138,36 +140,38 @@ class ContrainteBinaire(Contrainte):
         
         for paire in [[self.refVar1,self.refVar2],[self.refVar2,self.refVar1]]:
             for x in paire[0].domaine : #Test avec chaque valeur de la première variable
-                paire[0].metAJourValeur(x)
+                paire[0].met_a_jour_valeur(x)
                 
-                if not self.estPossible(paire[1]): #Si la valeur ne peut pas satisfaire la contrainte, on l'enlève du domaine
+                if not self.est_possible(paire[1]): #Si la valeur ne peut pas satisfaire la contrainte, on l'enlève du domaine
                     paire[0].domaine.remove(x)
                     modifiee = True
             
-            paire[0].metAJourValeur(None)
+            paire[0].met_a_jour_valeur(None)
         return modifiee
 
 class Variables :
     def __init__(self):
         self.variables = []
+        self.noms_variables = {}
 
-    def ajouteVar(self, var): 
+    def ajoute_var(self, var):
         self.variables.append(var)
+        self.noms_variables[var.nom] = var
 
-    def retourneVar(self, nom): 
-        for var in self.variables :
-            if var.nomEstEgal(nom) :
-                return var
-        return None
+    def retourne_var(self, nom): 
+        try :
+            return self.noms_variables[nom]
+        except :
+            return None
     
-    def consistanceDesNoeuds(self, contraintes): #Pour chaque contrainte unaire, on supprime des domaine des variable les valeurs qui ne respectent pas la contrainte
+    def consistance_des_noeuds(self, contraintes): #Pour chaque contrainte unaire, on supprime des domaine des variable les valeurs qui ne respectent pas la contrainte
         for c in contraintes:
             if c.dimension() == 1:
                 for val in c.refVar.domaine :
-                    if not c.estValide(c.refVar,val) :
+                    if not c.est_valide(c.refVar,val) :
                         c.refVar.domaine.remove(val)
   
-    def retourneNbVars(self): #Retourne le nombre de variables
+    def retourne_nb_vars(self): #Retourne le nombre de variables
         return len(self.variables)
     
     def __repr__(self):
@@ -179,21 +183,19 @@ class Variables :
 class Contraintes :
     def __init__(self):
         self.contraintes = []
-        self.contraintes_noms = []
     
-    def ajouteContrainte(self, c): 
+    def ajoute_contrainte(self, c): 
         self.contraintes.append(c)
-        self.contraintes_noms.append(repr(c))
     
-    def consistanceDesArcs(self):
+    def consistance_des_arcs(self):
         refaire = False
         for c in self.contraintes:
             if c.dimension == 2 and c.reviser():
                 refaire == True
         if refaire : #Si on peut peut-être encore supprimer des valeurs des domaines, on refait l'algorithme.
-            self.consistanceDesArcs()
+            self.consistance_des_arcs()
     
-    def retourneNbContraintes(self) : #Retourne le nombre de contraintes
+    def retourne_nb_contraintes(self) : #Retourne le nombre de contraintes
         return len(self.contraintes)
     
     def __repr__(self):
@@ -204,38 +206,38 @@ class Contraintes :
 
 
 
-def afficheSolution(algo, solution) :
+def affiche_solution(algo, solution) :
     print(f"Solutions avec l'algorithme {algo} : {str(solution)}" )
 
-def afficheNbIterations(algo, iterations):
+def affiche_nb_iterations(algo, iterations):
     print(f"Nombre d'itérations avec l'algorithme {algo} : {str(iterations)}" )
 
-def consistanceAvecVarsPrecedentes(k, contraintes, variables): 
+def consistance_avec_vars_precedentes(k, contraintes, variables): 
     for c in contraintes :                                
-        if variables[k].nom in c.variables:
+        if variables[k] in c.variables:
             for i in range(0,k+1):
-                if variables[i].nom in c.variables :
-                    if c.estValide(variables[k],variables[k].valeur):
+                if variables[i] in c.variables :
+                    if c.est_valide(variables[k],variables[k].valeur):
                         break
                     else :
                         return False
     return True                        
             
-def backtrack(k, contraintes, variables, iterations = 0): #k : indice de la variable actuelle
+def backtrack(k, contraintes, variables, iterations = 0):
     algo="bt"
     
     iterations +=1
     
     if k>=len(variables):
         
-        #afficheNbIterations(algo,iterations)
+        #affiche_nb_iterations(algo,iterations)
         
         solution = {}
         
         for var in variables :
             solution[var.nom]=var.valeur
         
-        #afficheSolution(algo,solution) 
+        #affiche_solution(algo,solution) 
 
         return solution
     
@@ -243,13 +245,13 @@ def backtrack(k, contraintes, variables, iterations = 0): #k : indice de la vari
         var = variables[k]
         
         for val in var.domaine: 
-            var.metAJourValeur(val)
-            if consistanceAvecVarsPrecedentes(k, contraintes, variables): #Si la consistance est valide, on continue l'algorithme sur la variable k+1
+            var.met_a_jour_valeur(val)
+            if consistance_avec_vars_precedentes(k, contraintes, variables):
                 reste = backtrack(k+1, contraintes, variables, iterations)
                 if reste != "echec":
                     return reste
     
-    var.metAJourValeur(None)
+    var.met_a_jour_valeur(None)
     return "echec"    
 
 
@@ -262,11 +264,6 @@ def grille_valide(grille):
         if not len(ligne) == len(grille):
             return False
     return True
-
-def grille_de_vrai_sudoku(grille):
-    if math.sqrt(len(grille))-int(math.sqrt(len(grille)))==0:
-        return True
-    return False
     
 def lignes(grille):
     return grille
@@ -298,7 +295,7 @@ def creation_des_variables(grille, variables):
             if grille[i][j] == "x":
                 domaine = list(range(1,len(grille)+1))
                 var = Variable(f"var({i},{j})",domaine)
-                variables.ajouteVar(var)
+                variables.ajoute_var(var)
                 grille[i][j] = f"var({i},{j})"
     return grille
 
@@ -308,18 +305,18 @@ def creation_des_contraintes(grille, contraintes, variables):
         ligne2=ligne.copy()
         for x in ligne :
             if not type(x) is int :
-                var = variables.retourneVar(x)
+                var = variables.retourne_var(x)
                 ligne2.remove(x)                                
                 for y in ligne2 :
-                    if type(y) is int:
-                        contrainte = ContrainteUnaire(var,"!=",y)
-                        if not repr(contrainte) in contraintes.contraintes_noms :
-                            contraintes.ajouteContrainte(contrainte)
+                    if isinstance(y,int):
+                        contrainte = Contrainte_unaire(var,"!=",y)
+                        if not contrainte in contraintes.contraintes :
+                            contraintes.ajoute_contrainte(contrainte)
                     else :
-                        var2 = variables.retourneVar(y)
-                        contrainte = ContrainteBinaire(var,"!=",var2)
-                        if not repr(contrainte) in contraintes.contraintes_noms :
-                            contraintes.ajouteContrainte(contrainte)        
+                        var2 = variables.retourne_var(y)
+                        contrainte = Contrainte_binaire(var,"!=",var2)
+                        if not contrainte in contraintes.contraintes :
+                            contraintes.ajoute_contrainte(contrainte)        
                         
 def creation_de_toutes_les_contraintes(grille, contraintes, variables):
     
@@ -333,14 +330,14 @@ def creation_de_toutes_les_contraintes(grille, contraintes, variables):
     creation_des_contraintes(Colonnes, contraintes, variables)
     creation_des_contraintes(Carres, contraintes, variables)
     
-    #variables.consistanceDesNoeuds(contraintes.contraintes)
-    #contraintes.consistanceDesArcs()
+    #variables.consistance_des_noeuds(contraintes.contraintes)
+    #contraintes.consistance_des_arcs()
 
 def solution_sudoku(grille):      
     contraintes = Contraintes()
     variables = Variables()
     
-    if not grille_valide(grille) or not grille_de_vrai_sudoku(grille):
+    if not grille_valide(grille) :
         raise Exception("La grille n'est pas valide")
 
     creation_de_toutes_les_contraintes(grille, contraintes, variables)
@@ -373,5 +370,3 @@ grille2 = [[5,4,"x","x",2,"x",8,"x",6],
 
 solution_sudoku(grille2)
 solution_sudoku(grille1)
-
-

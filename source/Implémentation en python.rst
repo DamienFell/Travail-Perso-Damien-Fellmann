@@ -21,8 +21,9 @@ valeur et son domaine dans une chaîne de caractère.
     :linenos:
  
 Deuxièmement, la classe **Contrainte** doit aussi être définie. Cependant, elle ne sera jamais directement utilisée
-et sera héritée par les classes plus spécifiques **ContrainteUnaire** et **ContrainteBinaire**. Son unique attibut 
-*variables* contient la liste des noms des variables sur lesquelles porte la contrainte. Sa méthode *dimension* retourne 
+et sera héritée par les classes plus spécifiques **ContrainteUnaire** et **ContrainteBinaire** : il s'agit donc
+d'une classe abstraite. Son unique attibut 
+*variables* contient la liste des variables sur lesquelles porte la contrainte. Sa méthode *dimension* retourne 
 le nombre de variables sur lesquelles elle agit, *estValide* teste si la contrainte est respectée en choisissant la 
 valeur *val* pour la variable *var* et *__repr__* retourne la représentation sous format str de la contrainte.
 
@@ -56,7 +57,7 @@ que l'opérateur *op* et la dimension de ces contraintes est de 2. Le fonctionne
 A présent, il s'agit d'implémenter la classe **Variables** qui gère l'ensemble des variables présentes dans un 
 problème de satisfaction de contraintes. Elle possède un seul attibut : la liste des variables, vide lors de 
 l'instanciation. Afin de la remplir, on utilise la méthode *ajouteVar*. Puis, *retourneVar* permet de retourner 
-une variable d'aprés son nom. La méthode *__repr__* quant à elle retourne une chaîne de caractères contenant toutes
+une variable d'après son nom. La méthode *__repr__* quant à elle retourne une chaîne de caractères contenant toutes
 les informations sur chaque variable.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
@@ -113,7 +114,28 @@ les lignes de la grille, avec des "x" pour les valeurs inconnues, et retourne la
 le même format.
 
 La première étape consiste alors à implémenter les fonctions *lignes*, *colonnes* et *carres* qui
-retourne des listes de listes qui sont les lignes, colonnes ou carrés de la grille.
+retournent des listes de listes qui sont les lignes, colonnes ou carrés de la grille.
+
+Pour illustrer cela, voici ci-dessous une grille de sudokus qui correspond à la liste 
+[[5,1,4,8,x,6,x,x,9],
+[x,x,6,x,5,x,x,x,x],
+[x,3,8,x,1,9,6,4,x],
+[6,x,x,4,8,x,5,x,x],
+[4,8,x,9,x,x,7,6,x],
+[3,7,9,5,x,1,x,8,x],
+[9,6,x,7,4,x,1,3,x],
+[x,x,x,x,x,8,x,x,2],
+[x,x,3,x,9,x,4,7,x]] :
+
+.. figure:: exemple_sudoku.png
+    
+    Exemple de sudoku tiré de :cite:`1000_sudokus`
+
+En vert est mise en évidence la première ligne de la liste retournée par la fonction *lignes*,
+représentée par la liste [5,1,4,8,x,6,x,x,9], en
+bleu la première colonne de la fonction *colonnes* représentée par la liste 
+[5,x,x,6,4,3,9,x,x] et en orange le premier carré de la fonction 
+*carres* représenté par la liste [5,1,4,x,x,6,x,3,8].
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
     :lines: 271-293
@@ -121,8 +143,8 @@ retourne des listes de listes qui sont les lignes, colonnes ou carrés de la gri
 
 Ensuite, à partir de la grille de sudoku, on peut créer les variables pour chaque case contenant un 
 "x". Leur nom est composé de l'indice *i* de la ligne et de l'indice *j* de la colonne d'où elles se 
-trouvent dans la grille. En plus de créer ces variables et de les ajouter à la liste des variables 
-(contenue dans une instanciation de la classe **Variables**), on remplace également les "x" de la grille
+trouvent dans la grille. En plus de créer ces variables et de les ajouter à la liste des variables,
+contenue dans une instanciation de la classe **Variables**, on remplace également les "x" de la grille
 par les noms des variables.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
@@ -158,17 +180,15 @@ toutes les contraintes.
 Finalement, il est l'heure de définir la fonction *solution_sudoku* qui peut
 résoudre tout sudoku réalisable. On commence par créer des instances des classes
 **Contraintes** et **Variables**. Ensuite, on contrôle que la grille de sudoku 
-est dans les normes avec les fonctions *grille_valide*, qui vérifie si chaque ligne
-a le même nombre d'éléments que la grille a de lignes, et *grille_de_vrai_sudoku*,
-qui teste si le nombre de lignes est un carré parfait (car le nombre de carrés 
-dans une grille de sudoku correspond à la racine carrées du nombre de lignes) 
-(on n'admet donc pas seulement des grilles 9x9 mais aussi par exemple des grilles
-16x16). Puis, on appelle la fonction *creation_de_toutes_les_contraintes* qui appelle
-aussi la fonction *creation_des_variables* pour ensuite utiliser l'algorithme
+est dans les normes avec la fonction *grille_valide*, qui vérifie si chaque ligne
+a le même nombre d'éléments que la grille a de lignes. 
+Puis, on appelle la fonction *creation_de_toutes_les_contraintes* qui appelle
+aussi la fonction *creation_des_variables*. On peut ensuite utiliser l'algorithme
 de recherche en profondeur d'abord *backtrack* qui prend en paramètre la grille ainsi
 que les listes de variables et de contraintes. Si la recherche a été fructueuse, on
 insère les valeurs valides des variables dans la grille et on l'imprime, sinon on 
-imprime un message indiquant que le sudoku ne peut pas être résolu.
+imprime un message indiquant que le sudoku ne peut pas être résolu, ce qui signifie
+qu'il n'a pas été généré correctement. cfd
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
     :lines: 260-270, 339-359

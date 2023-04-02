@@ -13,9 +13,15 @@ Qu'est-ce que la programmation par contraintes ? Ce paradigme est une façon de 
 problèmes décrits par un ensemble de variables sur lesquelles agissent des contraintes. Une 
 solution à ces problèmes consiste à affecter à chaque variable une valeur respectant les contraintes.
 Chaque variable possède un domaine qui contient toutes les valeurs qu'elle peut admettre. Les 
-contraintes quant à elle définissent les relations que doivent entretenir les variables entre elles
-ou avec des valeurs de référence. Elles peuvent donc concerner une seule variable dans le cas des contraintes unaires,
-deux variables dans le cas des contraintes binaires ou plus dans le cas des contraintes multiples.
+contraintes, quant à elles, définissent les relations que doivent entretenir les variables entre elles
+ou avec des valeurs de référence et qui limitent l'ensemble des valeurs qu'elles peuvent prendre simultanément. 
+Une contrainte peut notamment être de type arithmétique (=, ≠, <, <= ,>, >=) quand elle compare plusieurs valeurs.
+Elles peuvent donc concerner une seule variable dans le cas des contraintes unaires,
+deux variables dans le cas des contraintes binaires ou plus dans le cas des contraintes multiples. 
+Par exemple, la contrainte :math:`c` imposant qu'une variable :math:`x_1` possède une valeur :math:`v_1` 
+plus grande que la valeur :math:`v_2` de la variable :math:`x_2` peut s'écrire de la manière suivante : 
+:math:`c = \{ (v_1, v_2 ) | v_1>v_2 \}`.
+
 Ainsi, un problème de satisfaction de contraintes (PSC) se définit de la manière suivante :
 
 - L'ensemble de variables :math:`X = \{x_1, x_2, ..., x_n \}`.
@@ -26,15 +32,15 @@ Représentation d'un PSC
 =======================
 
 Une manière simple de visualiser et de comprendre de tels problèmes est la représentation par 
-un réseau de contraintes dans lequel les noeuds correspondent aux variables et les arcs correspondent
+un graphe de contraintes dans lequel les noeuds correspondent aux variables et les arcs correspondent
 aux contraintes. Voici par exemple un réseau de contraintes binaires, qui sera réutilisé par la suite, contenant quatre 
 variables :math:`x_1, x_2, x_3` et :math:`x_4`, leur domaines respectifs :math:`d_1 = \{b,c\}, d_2 = \{a,c\}, d_3 = \{b,c\}`
-et :math:`d_4 = \{a,b\}` ainsi que les contraintes d'inégalité les reliant (donc les variables reliées 
+et :math:`d_4 = \{a,b\}` ainsi que les contraintes d'inégalité les reliant représentées par les flêches (donc les variables reliées 
 ne doivent pas avoir la même valeur):
 
 .. figure:: reseau_contraintes_binaires.png
     
-    Réseau de contraintes binaires
+    Réseau de contraintes binaires tiré de :cite:`Ia_par_la_pratique`
 
 Méthodes de résolution
 ======================
@@ -43,14 +49,15 @@ Il existent diverses méthodes de résolution des problèmes de satisfaction de 
 d'algorithmes de recherche où l'on énumère toutes les combinaisons possibles de valeurs pour 
 les variables jusqu'à trouver celles respectant toutes les contraintes. 
 
-Méthode du backtrack
+Méthode du retour-arrière / backtracking
 ....................
 
 Dans ce travail, nous nous intéresserons uniquement aux méthodes basées
-sur la recherche en profondeur d'abord, aussi appelée backtrack : dans un 
+sur la recherche en profondeur d'abord, aussi appelée retour-arrière ou 
+backtracking : dans un 
 schéma arborescent, on explore chaque branche jusqu'au bout avant de remonter et d'explorer les
-autres branches. Dans la figure 2, on commence par le noeud A et on explore ensuite les autres noeuds
-en descendant puis en remontant dans le graphe jusqu'à tomber sur la solution au noeud I.
+autres branches. Dans la figure 2, on commence par le noeud A et on explore ensuite les autres noeuds, 
+les noeuds fils, en descendant, puis en remontant dans l'arbre jusqu'à tomber sur la solution au noeud I.
 
 .. figure:: Arbre_profondeur.png
     
@@ -60,11 +67,11 @@ Dans un problème de satisfaction de contraintes, la profondeur des nœuds corre
 variables satisfaisant les contraintes : on commence par tester une valeur pour une variable et on
 teste les valeurs pour les autres variables en descendant dans l'arbre de recherche. Lorsqu’aucune des valeurs du domaine d’une variable ne 
 peut coïncider avec les valeurs des variables déjà définies et les contraintes, on remonte et on continue la recherche avec d’autres valeurs 
-de la variable du niveau du dessus et ainsi de suite. 
+de la variable du niveau parent et ainsi de suite. 
 
 Le PSC de la figure 1 peut ainsi être résolu de la manière suivante (les \* représentent les 
-situations où aucune valeur du domaine d'une variable ne satisfait les contraintes et on procède 
-donc à un retour en arrière):
+situations où aucune valeur du domaine d'une variable ne satisfait les contraintes, ce qui 
+entraîne un retour en arrière):
 
 ..  csv-table:: Recherche en profondeur du PSC de la figure 1
     :header: "Etape", ":math:`x_1`", ":math:`x_2`", ":math:`x_3`", ":math:`x_4`"

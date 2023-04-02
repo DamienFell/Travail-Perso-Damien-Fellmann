@@ -13,3 +13,6 @@
     :all:
 
 ..  only:: html
+
+..  bibliography:: articles.bib
+    :all:
