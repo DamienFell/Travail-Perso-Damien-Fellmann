@@ -70,11 +70,11 @@ fait de même avec les autres variables en descendant dans l'arbre de recherche.
 peut coïncider avec les valeurs des variables déjà définies et les contraintes, on remonte et on continue la recherche avec d’autres valeurs 
 de la variable du niveau parent et ainsi de suite. 
 
-Le PSC de la figure 1 peut ainsi être résolu de la manière suivante (les \* représentent les 
+Le PSC de la :numref:`reseau` peut ainsi être résolu de la manière suivante (les \* représentent les 
 situations où aucune valeur du domaine d'une variable ne satisfait les contraintes, ce qui 
 entraîne un retour en arrière):
 
-..  csv-table:: Recherche en profondeur du PSC de la figure 1
+..  csv-table:: Recherche en profondeur du PSC de la :numref:`reseau`
     :header: "Etape", ":math:`x_1`", ":math:`x_2`", ":math:`x_3`", ":math:`x_4`"
     :widths: 5, 10, 10, 10, 10
 
@@ -101,18 +101,27 @@ Pour y parvenir, nous créons pour chaque variable :math:`x_i` un label :math:`L
 :math:`L_i ⊂ D_i`. Les valeurs testées ne seront donc plus toutes les valeurs possibles des domaines mais toutes 
 les valeurs possibles des labels actuels. Par conséquent, à chaque nouvelle affectation de valeur pour une variable
 :math:`x_i`, on met à jour les labels des variables :math:`x_j` avec :math:`j>i` : on élimine toutes les valeurs inconsistantes
-par rapport aux valeurs déjà attribuées de leurs labels respectifs.
+par rapport aux valeurs déjà attribuées de leurs labels respectifs. On supprime également la valeur testée du label
+de la variable actuelle. A chaque fois qu'un label d'une variable dont la valeur n'a pas
+encore été attribuée est vide, il faut tester une autre valeur pour la variable actuelle
+ou faire un retour en arrière si son label est également vide.
 
-..  csv-table:: Recherche en profondeur du PSC de la figure 1
+Voici ci-dessous la résolution du PSC de la :numref:`reseau` grâce à la méthode 
+du forward checking.
+
+..  csv-table:: Méthode du forward checking avec le PSC de la :numref:`reseau`
     :header: "Etape", ":math:`x_1`", ":math:`x_2`", ":math:`x_3`", ":math:`x_4`", ":math:`l_1`", ":math:`l_2`", ":math:`l_3`", ":math:`l_4`"
     :widths: 5,5,5,5,5,5,5,5,5
     
-    **0**,\-,\-,\-,\-,:math:`\{ b  c \}`,:math:`ac`,:math:`bc`,:math:`ab`
-    **1**,:math:`b`,\-,\-,\-,:math:`c`,:math:`ac`,:math:`c`,:math:`a`
-    **2**,:math:`b`,:math:`a`,\-,\-,:math:`c`,:math:`c`,:math:`c`,\- 
-    **3**,:math:`b`,:math:`c`,\-,\-,:math:`c`,\-,\-,:math:`a` 
-    **4**,:math:`c`,\-,\-,\-,\-,:math:`a`,:math:`b`,:math:`ab` 
-    **5**,:math:`c`,:math:`a`,\-,\-,\-,\-,:math:`b`,:math:`b`
-    **6**,:math:`c`,:math:`a`,:math:`b`,\-,\-,\-,\-,:math:`b` 
-    **7**,:math:`c`,:math:`a`,:math:`b`,:math:`b`,\-,\-,\-,\- 
+    **0**,\-,\-,\-,\-,:math:`\{ b ; c \}`,:math:`\{ a ; c \}`,:math:`\{ b ; c \}`,:math:`\{ a ; b \}`
+    **1**,:math:`b`,\-,\-,\-,:math:`\{c \}`,:math:`\{ a ; c \}`,:math:`\{ c \}`,:math:`\{ a \}`
+    **2**,:math:`b`,:math:`a`,\-,\-,:math:`\{ c \}`,:math:`\{ c \}`,:math:`\{ c \}`, :math:`\{ \}` 
+    **3**,:math:`b`,:math:`c`,\-,\-,:math:`\{ c \}`,:math:`\{ \}` ,:math:`\{ \}` ,:math:`\{ a \}` 
+    **4**,:math:`c`,\-,\-,\-,:math:`\{ \}` ,:math:`\{ a \}`,:math:`\{ b \}`,:math:`\{ a ; b \}` 
+    **5**,:math:`c`,:math:`a`,\-,\-,:math:`\{ \}` ,:math:`\{ \}` ,:math:`\{ b \}`,:math:`\{ b \}`
+    **6**,:math:`c`,:math:`a`,:math:`b`,\-,:math:`\{ \}` ,:math:`\{ \}` ,:math:`\{ \}` ,:math:`\{ b \}` 
+    **7**,:math:`c`,:math:`a`,:math:`b`,:math:`b`,:math:`\{ \}` ,:math:`\{ \}` ,:math:`\{ \}` ,:math:`\{ \}` 
     
+On remarque que le nombre d'étapes nécessaires diminue déjà pour un problème facile à résoudre. On peut
+dès lors s'imaginer que cette amélioration sera très bénéfique 
+pour la résolution d'un problème plus complexe comme celui des sudokus.
