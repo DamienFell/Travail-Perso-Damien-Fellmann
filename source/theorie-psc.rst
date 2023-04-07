@@ -38,6 +38,7 @@ variables :math:`x_1, x_2, x_3` et :math:`x_4`, leur domaines respectifs :math:`
 et :math:`d_4 = \{a,b\}` ainsi que les contraintes d'inégalité les reliant représentées par les flêches (donc les variables reliées 
 ne doivent pas avoir la même valeur):
 
+.. _reseau: 
 .. figure:: reseau_contraintes_binaires.png
     
     Réseau de contraintes binaires tiré de :cite:`Ia_par_la_pratique`
@@ -64,8 +65,8 @@ les noeuds fils, en descendant, puis en remontant dans l'arbre jusqu'à tomber s
     Graphe d'une recherche en profondeur
 
 Dans un problème de satisfaction de contraintes, la profondeur des nœuds correspond au nombre de
-variables satisfaisant les contraintes : on commence par tester une valeur pour une variable et on
-teste les valeurs pour les autres variables en descendant dans l'arbre de recherche. Lorsqu’aucune des valeurs du domaine d’une variable ne 
+variables satisfaisant les contraintes : on commence par tester et par attribuer une valeur pour une variable et on
+fait de même avec les autres variables en descendant dans l'arbre de recherche. Lorsqu’aucune des valeurs du domaine d’une variable ne 
 peut coïncider avec les valeurs des variables déjà définies et les contraintes, on remonte et on continue la recherche avec d’autres valeurs 
 de la variable du niveau parent et ainsi de suite. 
 
@@ -90,7 +91,28 @@ entraîne un retour en arrière):
     11,":math:`c`", ":math:`a`", ":math:`b`", \-
     12,":math:`c`", ":math:`a`", ":math:`b`", ":math:`b`"
 
-Méthode du forwardchecking
+Méthode du forward checking
 ....................
 
-Chapitre pas encore écrit
+A présent, il est possible d'améliorer la méthode du backtracking grâce à sa version complémentaire :
+le forward checking. Ce dernier permet d'éviter à l'avance d'assigner des valeurs inconsistante, donc qui
+ne respectent pas leurs contraintes, aux variables pour lesquelles aucune valeur n'a été encore attribuée. 
+Pour y parvenir, nous créons pour chaque variable :math:`x_i` un label :math:`L_i` correspondant à un sous-ensemble de son domaine :
+:math:`L_i ⊂ D_i`. Les valeurs testées ne seront donc plus toutes les valeurs possibles des domaines mais toutes 
+les valeurs possibles des labels actuels. Par conséquent, à chaque nouvelle affectation de valeur pour une variable
+:math:`x_i`, on met à jour les labels des variables :math:`x_j` avec :math:`j>i` : on élimine toutes les valeurs inconsistantes
+par rapport aux valeurs déjà attribuées de leurs labels respectifs.
+
+..  csv-table:: Recherche en profondeur du PSC de la figure 1
+    :header: "Etape", ":math:`x_1`", ":math:`x_2`", ":math:`x_3`", ":math:`x_4`", ":math:`l_1`", ":math:`l_2`", ":math:`l_3`", ":math:`l_4`"
+    :widths: 5,5,5,5,5,5,5,5,5
+    
+    **0**,\-,\-,\-,\-,:math:`\{ b  c \}`,:math:`ac`,:math:`bc`,:math:`ab`
+    **1**,:math:`b`,\-,\-,\-,:math:`c`,:math:`ac`,:math:`c`,:math:`a`
+    **2**,:math:`b`,:math:`a`,\-,\-,:math:`c`,:math:`c`,:math:`c`,\- 
+    **3**,:math:`b`,:math:`c`,\-,\-,:math:`c`,\-,\-,:math:`a` 
+    **4**,:math:`c`,\-,\-,\-,\-,:math:`a`,:math:`b`,:math:`ab` 
+    **5**,:math:`c`,:math:`a`,\-,\-,\-,\-,:math:`b`,:math:`b`
+    **6**,:math:`c`,:math:`a`,:math:`b`,\-,\-,\-,\-,:math:`b` 
+    **7**,:math:`c`,:math:`a`,:math:`b`,:math:`b`,\-,\-,\-,\- 
+    
