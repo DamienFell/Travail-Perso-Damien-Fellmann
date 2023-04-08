@@ -94,17 +94,17 @@ entraîne un retour en arrière):
 Méthode du forward checking
 ....................
 
-A présent, il est possible d'améliorer la méthode du backtracking grâce à sa version complémentaire :
-le forward checking. Ce dernier permet d'éviter à l'avance d'assigner des valeurs inconsistante, donc qui
+A présent, il est possible d'améliorer notre recherche en profondeur d'abord grâce à la méthode du
+forward checking. Ce dernier permet d'éviter à l'avance d'assigner des valeurs inconsistantes, donc qui
 ne respectent pas leurs contraintes, aux variables pour lesquelles aucune valeur n'a été encore attribuée. 
 Pour y parvenir, nous créons pour chaque variable :math:`x_i` un label :math:`L_i` correspondant à un sous-ensemble de son domaine :
 :math:`L_i ⊂ D_i`. Les valeurs testées ne seront donc plus toutes les valeurs possibles des domaines mais toutes 
 les valeurs possibles des labels actuels. Par conséquent, à chaque nouvelle affectation de valeur pour une variable
 :math:`x_i`, on met à jour les labels des variables :math:`x_j` avec :math:`j>i` : on élimine toutes les valeurs inconsistantes
-par rapport aux valeurs déjà attribuées de leurs labels respectifs. On supprime également la valeur testée du label
-de la variable actuelle. A chaque fois qu'un label d'une variable dont la valeur n'a pas
+par rapport aux valeurs déjà attribuées de leurs labels respectifs. A chaque fois qu'un label d'une variable dont la valeur n'a pas
 encore été attribuée est vide, il faut tester une autre valeur pour la variable actuelle
-ou faire un retour en arrière si son label est également vide.
+ou faire un retour en arrière si son label est également vide. Dans ces cas-là, on met également 
+à jour les labels avec des sauvegardes qu'on a effectuées avant l'affectation de chaque valeur.
 
 Voici ci-dessous la résolution du PSC de la :numref:`reseau` grâce à la méthode 
 du forward checking.
@@ -114,13 +114,13 @@ du forward checking.
     :widths: 5,5,5,5,5,5,5,5,5
     
     **0**,\-,\-,\-,\-,:math:`\{ b ; c \}`,:math:`\{ a ; c \}`,:math:`\{ b ; c \}`,:math:`\{ a ; b \}`
-    **1**,:math:`b`,\-,\-,\-,:math:`\{c \}`,:math:`\{ a ; c \}`,:math:`\{ c \}`,:math:`\{ a \}`
-    **2**,:math:`b`,:math:`a`,\-,\-,:math:`\{ c \}`,:math:`\{ c \}`,:math:`\{ c \}`, :math:`\{ \}` 
-    **3**,:math:`b`,:math:`c`,\-,\-,:math:`\{ c \}`,:math:`\{ \}` ,:math:`\{ \}` ,:math:`\{ a \}` 
-    **4**,:math:`c`,\-,\-,\-,:math:`\{ \}` ,:math:`\{ a \}`,:math:`\{ b \}`,:math:`\{ a ; b \}` 
-    **5**,:math:`c`,:math:`a`,\-,\-,:math:`\{ \}` ,:math:`\{ \}` ,:math:`\{ b \}`,:math:`\{ b \}`
-    **6**,:math:`c`,:math:`a`,:math:`b`,\-,:math:`\{ \}` ,:math:`\{ \}` ,:math:`\{ \}` ,:math:`\{ b \}` 
-    **7**,:math:`c`,:math:`a`,:math:`b`,:math:`b`,:math:`\{ \}` ,:math:`\{ \}` ,:math:`\{ \}` ,:math:`\{ \}` 
+    **1**,:math:`b`,\-,\-,\-,:math:`\{ b ; c \}`,:math:`\{ a ; c \}`,:math:`\{ c \}`,:math:`\{ a \}`
+    **2**,:math:`b`,:math:`a`,\-,\-,:math:`\{ b ; c \}`,:math:`\{ a ; c \}`,:math:`\{ c \}`, :math:`\{ \}` 
+    **3**,:math:`b`,:math:`c`,\-,\-,:math:`\{ b ; c \}`,:math:`\{ a ; c \}` ,:math:`\{ \}` ,:math:`\{ a \}` 
+    **4**,:math:`c`,\-,\-,\-,:math:`\{ b ; c \}` ,:math:`\{ a \}`,:math:`\{ b \}`,:math:`\{ a ; b \}` 
+    **5**,:math:`c`,:math:`a`,\-,\-,:math:`\{ b ; c \}` ,:math:`\{ a \}` ,:math:`\{ b \}`,:math:`\{ b \}`
+    **6**,:math:`c`,:math:`a`,:math:`b`,\-,:math:`\{ b ; c \}` ,:math:`\{ a \}` ,:math:`\{ b \}` ,:math:`\{ b \}` 
+    **7**,:math:`c`,:math:`a`,:math:`b`,:math:`b`,:math:`\{ b ; c \}` ,:math:`\{ a \}` ,:math:`\{ b \}` ,:math:`\{ b \}` 
     
 On remarque que le nombre d'étapes nécessaires diminue déjà pour un problème facile à résoudre. On peut
 dès lors s'imaginer que cette amélioration sera très bénéfique 
