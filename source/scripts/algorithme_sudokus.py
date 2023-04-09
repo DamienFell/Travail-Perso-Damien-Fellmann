@@ -48,6 +48,13 @@ class Contrainte(ABC):
     @abstractmethod
     def __repr__(self): 
         pass
+#Suite de la classe Contrainte
+    def propage(self, var):
+        for val in var.label :
+            if not self.est_valide(var,val):
+                var.label.remove(val)
+                
+        return len(var.label)>0
         
 class Contrainte_unaire(Contrainte):
     def __init__(self, refVar, op, ref):
@@ -222,24 +229,22 @@ def consistance_avec_vars_precedentes(k, contraintes, variables):
                     else :
                         return False
     return True                        
-            
+
+def retourne_solution(variables):
+    solution = {}
+        
+    for var in variables :
+        solution[var.nom]=var.valeur
+    
+    return solution
+
 def backtrack(k, contraintes, variables, iterations = 0):
     algo="bt"
     
     iterations +=1
     
     if k>=len(variables):
-        
-        #affiche_nb_iterations(algo,iterations)
-        
-        solution = {}
-        
-        for var in variables :
-            solution[var.nom]=var.valeur
-        
-        #affiche_solution(algo,solution) 
-
-        return solution
+        return retourne_solution(variables)
     
     else :
         var = variables[k]
@@ -254,8 +259,53 @@ def backtrack(k, contraintes, variables, iterations = 0):
     var.met_a_jour_valeur(None)
     return "echec"    
 
+def propage_aux_vars_suivantes(k, contraintes, variables):
+    for c in contraintes :
+        for var in variables[k+1:]:
+            if val in c.variables:
+                if c.propage(val):
+                    break
+                else :
+                    return False
+    
+    return True
 
+def retourne_labels(k, variables):
+    labels = {}
+    
+    for val in variables[k+1:]:
+        labels[val] = copy.deepcopy(val.label)
+    
+    return labels
 
+def met_a_jour_labels(k,variables, labels):
+    for val in variables[k+1:]:
+        val.label = copy.deepcopy(labels[val])
+
+def forward_checking(k, contraintes, variables, iterations = 0):
+    algo="fc"
+    
+    iterations +=1
+    
+    if k>=len(variables):
+        return retourne_solution(variables)
+    
+    else :
+        var = variables[k]
+        anciens_labels = retourne_labels(k, variables)
+        
+        for val in var.label:
+            var.met_a_jour_valeur(val)
+            if propage_aux_vars_suivantes(k,contraintes, variables):
+                reste = forward_checking(k+1, contraintes, variables, iterations)
+                if reste != "echec":
+                    return reste
+                
+            met_a_jour_labels(k, variables, anciens_labels)
+    
+    var.met_a_jour_valeur(None)
+    return "echec"    
+        
 ###############################################################################################################################################################
 
 
@@ -342,7 +392,7 @@ def solution_sudoku(grille):
 
     creation_de_toutes_les_contraintes(grille, contraintes, variables)
     
-    sol = backtrack(0,contraintes.contraintes,variables.variables)
+    sol = forward_checking(0,contraintes.contraintes,variables.variables)
     
     if not sol == "echec":        
         for var in variables.variables:
@@ -369,4 +419,34 @@ grille2 = [[5,4,"x","x",2,"x",8,"x",6],
 
 
 solution_sudoku(grille2)
-solution_sudoku(grille1)
+#solution_sudoku(grille1)
+
+x1 = Variable("x1", ["b","c"],"b")
+x2 = Variable("x2", ["a","c"])
+x3 = Variable("x3", ["b","c"])
+x4 = Variable("x4", ["a","b"])
+
+variables = Variables()
+variables.ajoute_var(x1)
+variables.ajoute_var(x2)
+variables.ajoute_var(x3)
+variables.ajoute_var(x4)
+
+c12 = Contrainte_binaire(x1,"!=",x2)
+c13 = Contrainte_binaire(x1,"!=",x3)
+c14 = Contrainte_binaire(x1,"!=",x4)
+c23 = Contrainte_binaire(x2,"!=",x3)
+c24 = Contrainte_binaire(x2,"!=",x4)
+
+contraintes = Contraintes()
+contraintes.ajoute_contrainte(c12)
+contraintes.ajoute_contrainte(c13)
+contraintes.ajoute_contrainte(c14)
+contraintes.ajoute_contrainte(c23)
+contraintes.ajoute_contrainte(c24)
+
+propage_aux_vars_suivantes(0, contraintes.contraintes, variables.variables)
+
+
+sol = backtrack(0,contraintes.contraintes,variables.variables)
+print(sol)

@@ -76,8 +76,8 @@ son nom dans la liste :code:`contraintes_noms`. Finalement, la méthode :code:`_
     :lines: 180-187, 199-204
     :linenos:
 
-Algorithme de backtrack
-=======================
+Algorithme de backtracking
+==========================
 
 Aprés avoir défini ces quatre classes, nous pouvons implémenter l'algorithme de recherche en profondeur d'abord 
 dans la fonction :code:`backtrack`. D'abord, le premier paramètre :code:`k` correspond à l'indice de la variable actuelle 
@@ -93,7 +93,7 @@ retourne un dictionnaire contenant les noms des variables et leur valeur. Cepend
 fonctionne, l'algorithme retourne "echec".
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 213-224,229, 233-237, 240-253
+    :lines: 222-260
     :linenos:
 
 Afin de mieux comprendre l'algorithme de backtracking, prenons l'exemple du PSC de la 
@@ -110,10 +110,31 @@ en jaune :
     
     Pseudo-exécution de l'algorithme de backtracking du PSC de la :numref:`reseau`
 
-Algorithme de forwardchecking
+Algorithme de forward checking
 =============================
 
-Le forwardchecking 
+Il s'agit maintenant d'implémenter l'algorhitme de forward checking dont
+la structure récursive est la même que pour le backtracking. A chaque
+niveau :code:`k`, on commence par définir la variable actuelle et par
+effectuer une copie des labels actuels dans la variable :code:`anciens_labels`
+grâce à la fonction :code:`retourne_labels`. Ensuite, on a le même code
+que la fonction :code:`backtrack` mais :code:`consistance_avec_vars_precedentes`
+est remplacée par :code:`propage_aux_vars_suivantes`. Cette fonction regarde
+pour chaque contrainte si une variable d'indice plus grand que :code:`k`
+est l'une des variables sur laquelle la contrainte s'applique. Si c'est le cas,
+on utilise la méthode de la classe :code:`Contrainte propage`. Cette dernière
+supprime les valeurs inconsistantes par rapport à la contrainte du label
+de la variable et à la fin, on retourne :code:`True` si le label contient
+encore des valeurs et :code:`False` s'il est vide. Ainsi, si le label
+n'est pas vide après la propagation, on peut continuer la propagation
+avec les contraintes suivantes. Sinon, on s'arrête et on retourne :code:`False`
+, car on ne peut pas continuer la recherche avec un label vide, et on remet 
+à jour les labels avec la variable :code:`anciens_labels` et la fonction
+:code:`met_a_jour_labels`.
+
+..  literalinclude:: scripts/algorithme_sudokus.py
+    :lines: 51-58, 262-307
+    :linenos:
 
 Application à la résolution de sudokus
 ======================================
