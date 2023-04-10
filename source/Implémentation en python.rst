@@ -66,31 +66,32 @@ de satisfaction de contraintes. Elle possède les attributs suivants :
 :code:`noms_variables` ayant pour clés les noms des variables et pour valeurs les 
 variables elles-mêmes, les listes :code:`contraintes_binaires` et :code:`contraintes_unaires`
 contenant toutes les contraintes du PSC. Puis,
-on utilise la méthode :code:`ajouteVar` qui ajoute la 
-variable :code:`var` dans :code:`variables`et qui remplit
-:code:`noms_variables`. Puis, :code:`retourneVar` permet de retourner 
-une variable d'après son nom. La méthode :code:`__repr__` quant à elle retourne une chaîne de caractères contenant toutes
-les informations sur chaque variable.
+on utilise la méthode :code:`ajouteVar` pour ajouter une 
+variable :code:`var` dans :code:`variables` et pour remplir en même temps
+:code:`noms_variables`. Ensuite, :code:`retourneVar` permet de retourner 
+une variable d'après son nom. La méthode :code:`__repr__` quant à elle retourne 
+une chaîne de caractères contenant toutes les informations sur chaque variable et
+chaque contrainte.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 139-162, 173-178
+    :lines: 139-162
     :linenos:
 
-Comme pour les variables, on définit également une classe :code:`Contraintes` qui s'occupe de l'ensemble des contraintes 
-du PSC. Ses attributs :code:`contraintes` et :code:`contraintes_noms` contiennent toutes les contraintes et leur nom et sont 
-également vides au départ. Lorsqu'une contrainte est ajoutée avec :code:`ajouteContrainte`, on doit donc aussi rajouter 
-son nom dans la liste :code:`contraintes_noms`. Finalement, la méthode :code:`__repr__` est semblable à celle de la classe 
-:code:`Variables`.
+On définit la méthode :code:`consistance_contraintes_unaires` afin de réduire les 
+labels de chaque variable en enlevant toutes les valeurs inconcistantes par rapport
+aux contraintes unaires, ce qui signifie que les algorhitmes de backtracking et de
+forward checking n'utiliseront ensuite que les contraintes binaires.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 180-187, 199-204
+    :lines: 166-171
     :linenos:
 
 Algorithme de backtracking
 ==========================
 
-Aprés avoir défini ces quatre classes, nous pouvons implémenter l'algorithme de recherche en profondeur d'abord 
-dans la fonction :code:`backtrack`. D'abord, le premier paramètre :code:`k` correspond à l'indice de la variable actuelle 
+Nous allons maintenant implémenter à l'intérieur de la 
+classe :code:`PSC` l'algorithme de recherche en profondeur d'abord 
+dans la méthode :code:`backtrack`. D'abord, le premier paramètre :code:`k` correspond à l'indice de la variable actuelle 
 sur laquelle on teste les valeurs, valant initalement 0. Lorsqu'on teste les valeurs de la variable suivante, on rappelle la fonction
 avec :code:`k+1` en paramètre : cette fonction est donc récursive. Mais avant d'être rappelée, elle fait appel à la 
 fonction :code:`consistance_avec_vars_precedentes` qui est au coeur du fonctionnement de l'algorithme. Elle passe en revue 
@@ -103,7 +104,7 @@ retourne un dictionnaire contenant les noms des variables et leur valeur. Cepend
 fonctionne, l'algorithme retourne "echec".
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 222-260
+    :lines: 180-219
     :linenos:
 
 Afin de mieux comprendre l'algorithme de backtracking, prenons l'exemple du PSC de la 
@@ -111,7 +112,7 @@ Afin de mieux comprendre l'algorithme de backtracking, prenons l'exemple du PSC 
 par exemple on a le code suivant pour la première variable : :code:`x1 = Variable("x1", ["b","c"])`, et pour la 
 contrainte entre la variable :code:`x1` et :code:`x2` on a ceci : :code:`c12 = Contrainte_binaire(x1,"!=",x2)`. Après 
 avoir ajouter toutes nos variables et contraintes dans les instances des classes :code:`Variables` et 
-:code:`Contraintes`, nous pouvons exécuter l'algorhitme de backtracking, représenter par la 
+:code:`Contraintes`, nous pouvons exécuter l'algorhitme de backtracking, représenté par la 
 pseudo-exécution suivante dans laquelle les assignations des valeurs solutions sont représentées 
 en jaune :
 
@@ -129,7 +130,7 @@ niveau :code:`k`, on commence par définir la variable actuelle et par
 effectuer une copie des labels actuels dans la variable :code:`anciens_labels`
 grâce à la fonction :code:`retourne_labels`. Ensuite, on a le même code
 que la fonction :code:`backtrack` mais :code:`consistance_avec_vars_precedentes`
-est remplacée par :code:`propage_aux_vars_suivantes`. Cette fonction regarde
+est remplacée par :code:`propagation_aux_vars_suivantes`. Cette fonction regarde
 pour chaque contrainte si une variable d'indice plus grand que :code:`k`
 est l'une des variables sur laquelle la contrainte s'applique. Si c'est le cas,
 on utilise la méthode de la classe :code:`Contrainte propage`. Cette dernière
@@ -137,30 +138,39 @@ supprime les valeurs inconsistantes par rapport à la contrainte du label
 de la variable et à la fin, on retourne :code:`True` si le label contient
 encore des valeurs et :code:`False` s'il est vide. Ainsi, si le label
 n'est pas vide après la propagation, on peut continuer la propagation
-avec les contraintes suivantes. Sinon, on s'arrête et on retourne :code:`False`
+avec les contraintes suivantes. Sinon, la
+:code:`propagation_aux_vars_suivantes` de la variable actuelle 
+retourne :code:`False` et on s'arrête
 , car on ne peut pas continuer la recherche avec un label vide, et on remet 
 à jour les labels avec la variable :code:`anciens_labels` et la fonction
 :code:`met_a_jour_labels`.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 51-58, 262-307
+    :lines: 220-266
     :linenos:
 
 Application à la résolution de sudokus
 ======================================
 
-Afin de résoudre des sudokus à l'aide de l'algorithme de backtrack précédemment implémenté, nous
+Afin de résoudre des sudokus à l'aide de l'algorithme de backtracking ou
+de forward checking précédemment implémenté, nous
 devons définir les variables, leurs domaines et les contraintes du problème. Les variables correspondent
 aux cases vides des grilles de sudokus. Leur domaine est le même pour toutes et est les nombres entre 1 
 et la taille de la grille (9 habituellement). Ce sont des contraintes d'inégalités qui définissent
 les relations des variables entre elles et des variables avec les cases déjà numérotées : chaque case
 d'une même ligne, d'une même colonne ou d'un même carré ne doit pas avoir la même valeur qu'une autre.
 
-La fonction que nous allons développer prend en paramètre une grille sous forme de liste de listes qui sont 
-les lignes de la grille, avec des "x" pour les valeurs inconnues, et retourne la grille complétée sous 
-le même format.
+Pour y parvenir, nous allons développer la classe :code:`Sudokus_PSC` qui est une classe
+fille de la classe :code:`PSC`. Lors de son instanciation, elle prend comme attribut la grille 
+de sudoku qu'il faut résoudre, sous forme de liste de listes qui sont 
+les lignes de la grille, avec des "x" pour les valeurs inconnues.
 
-La première étape consiste alors à implémenter les fonctions *lignes*, *colonnes* et *carres* qui
+..  literalinclude:: scripts/algorithme_sudokus.py
+    :lines: 270-274
+    :linenos:
+    
+La prochaine étape consiste ensuite à implémenter les méthodes 
+:code:`lignes`, :code:`colonnes` et :code:`carres` qui
 retournent des listes de listes qui sont les lignes, colonnes ou carrés de la grille.
 
 Pour illustrer cela, voici ci-dessous une grille de sudokus qui correspond à la liste
@@ -184,21 +194,23 @@ bleu la première colonne de la fonction :code:`colonnes` représentée par la l
 :code:`[5,x,x,6,4,3,9,x,x]` et en orange le premier carré de la fonction 
 :code:`carres` représenté par la liste :code:`[5,1,4,x,x,6,x,3,8]`.
 
+Voici donc le code implémentant ces trois méthodes :
+
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 271-293
+    :lines: 281-304
     :linenos:
 
 Ensuite, à partir de la grille de sudoku, on peut créer les variables pour chaque case contenant un 
 "x". Leur nom est composé de l'indice :code:`i` de la ligne et de l'indice :code:`j` de la colonne d'où elles se 
 trouvent dans la grille. En plus de créer ces variables et de les ajouter à la liste des variables,
-contenue dans une instanciation de la classe :code:`Variables`, on remplace également les "x" de la grille
+on remplace également les "x" de la grille
 par les noms des variables.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 295-303
+    :lines: 305-313
     :linenos:
 
-Pour instancier les contraintes, on implémente la fonction :code:`creation_des_contraintes` qui prend dans le
+Pour instancier les contraintes, on implémente la méthode :code:`creation_des_contraintes` qui prend dans le
 paramètre :code:`grille` soit la liste des lignes, soit celle des colonnes, soit celle des carrés générées par
 les fonctions précédemment définies. Pour chaque case qui contient un nom de variable, on crée les
 contraintes unaires portant sur cette variable (par rapport aux cases de la même "ligne" 
@@ -210,33 +222,33 @@ des contraintes (cette étape est surtout nécessaire lorsqu'on rajoute les cont
 ont souvent déjà été ajoutées lors des appels de la fonction avec les lignes et les colonnes).
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 306-322
+    :lines: 314-332
     :linenos:
 
-Puis, la fonction :code:`creation_de_toutes_les_contraintes` génère l'ensemble des 
-contraintes en appelant d'abord la fonction :code:`creation_des_variables` pour  
+Puis, la méthode:code:`creation_de_toutes_les_contraintes` génère l'ensemble des 
+contraintes en appelant d'abord la méthode :code:`creation_des_variables` pour  
 instancier les variables et créer la nouvelle grille contenant le nom de ces
 dernières, ainsi qu'en créant 
 les listes des lignes, colonnes et carrés avec lesquelles peuvent être générées 
 toutes les contraintes. 
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 324-334
+    :lines: 332-342
     :linenos:
 
-Finalement, il est l'heure de définir la fonction :code:`solution_sudoku` qui peut
-résoudre tout sudoku réalisable. On commence par créer des instances des classes
-:code:`Contraintes` et :code:`Variables`. Ensuite, on contrôle que la grille de sudoku 
-est dans les normes avec la fonction :code:`grille_valide`, qui vérifie si chaque ligne
+Finalement, il est l'heure de définir la méthode :code:`solution_sudoku` qui doit 
+être appelée après avoir créer une instance :code:`Sudokus_PSC` et qui résout donc
+toute grille de sudoku réalisable. On commence par contrôler que la grille de sudoku 
+est dans les normes avec la méthode :code:`grille_valide`, qui vérifie si chaque ligne
 a le même nombre d'éléments que la grille a de lignes. 
-Puis, on appelle la fonction :code:`creation_de_toutes_les_contraintes` qui appelle
-aussi la fonction :code:`creation_des_variables`. On peut ensuite utiliser l'algorithme
-de recherche en profondeur d'abord :code:`backtrack` qui prend en paramètre la grille ainsi
-que les listes de variables et de contraintes. Si la recherche a été fructueuse, on
+Puis, on appelle la méthode :code:`creation_de_toutes_les_contraintes` qui appelle
+aussi la méthpde :code:`creation_des_variables`. On peut ensuite utiliser l'algorithme
+de recherche en profondeur d'abord :code:`backtrack` ou l'algorhitme
+de forward checking. Si la recherche a été fructueuse, on
 insère les valeurs valides des variables dans la grille et on l'imprime, sinon on 
 imprime un message indiquant que le sudoku ne peut pas être résolu, ce qui signifie
 qu'il n'a pas été généré correctement.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 260-270, 339-359
+    :lines: 275-280, 343-364
     :linenos:

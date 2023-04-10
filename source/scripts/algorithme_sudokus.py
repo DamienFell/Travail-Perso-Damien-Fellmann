@@ -156,18 +156,19 @@ class PSC :
     def __repr__(self):
         str = "Variables : \n"
         for var in self.variables :
-            str += "\t" + var.__repr__() + "\n"
+            str += var.__repr__() + "\n"
         str += "Contraintes : \n"
-        for c in self.contraintes :
-            str += "\t" + c.__repr__() + "\n"
+        for c in self.contraintes_unaires :
+            str += c.__repr__() + "\n"
+        for c in self.contraintes_binaires :
+            str += c.__repr__() + "\n"
         return str
-        
-    def consistance_contraintes_unaires(self): #Pour chaque contrainte unaire, on supprime des domaine des variable les valeurs qui ne respectent pas la contrainte
+#Suite de la classe PSC        
+    def consistance_contraintes_unaires(self):
         for c in self.contraintes_unaires:
             for val in c.refVar.label :
                 if not c.est_valide(c.refVar,val) :
                     c.refVar.label.remove(val)
-    
     
     def consistance_des_arcs(self):
         refaire = False
@@ -176,7 +177,7 @@ class PSC :
                 refaire == True
         if refaire : #Si on peut peut-être encore supprimer des valeurs des domaines, on refait l'algorithme.
             self.consistance_des_arcs()
-
+#Suite de la classe PSC 
     def consistance_avec_vars_precedentes(self, k): 
         for c in contraintes_binaires :                                
             if self.variables[k] in c.variables:
@@ -216,8 +217,8 @@ class PSC :
         
         var.met_a_jour_valeur(None)
         return "echec"    
-
-    def propage_aux_vars_suivantes(self, k):
+#Suite de la classe PSC 
+    def propagation_aux_vars_suivantes(self, k):
         for c in self.contraintes_binaires :
             for var in self.variables[k+1:]:
                 if var in c.variables:
@@ -254,7 +255,7 @@ class PSC :
             
             for val in var.label:
                 var.met_a_jour_valeur(val)
-                if self.propage_aux_vars_suivantes(k):
+                if self.propagation_aux_vars_suivantes(k):
                     reste = self.forward_checking(k+1, iterations)
                     if reste != "echec":
                         return reste
@@ -271,13 +272,13 @@ class Sudokus_PSC(PSC):
     def __init__(self, grille):
         PSC.__init__(self)
         self.grille = grille
-    
+#Suite de la classe Sudokus_PS    
     def grille_valide(self):
         for ligne in self.grille :
             if not len(ligne) == len(self.grille):
                 return False
         return True
-    
+#Suite de la classe Sudokus_PSC    
     def lignes(self):
         return self.grille
 
@@ -301,7 +302,7 @@ class Sudokus_PSC(PSC):
                         carre.append(self.grille[taille_carre*i+k][taille_carre*j+l])
                 result.append(carre)
         return result
-
+#Suite de la classe Sudokus_PSC
     def creation_des_variables(self):
         domaine = list(range(1,len(self.grille)+1))
         for i in range(len(self.grille)) :
@@ -310,7 +311,7 @@ class Sudokus_PSC(PSC):
                     var = Variable(f"var({i},{j})",domaine)
                     self.ajoute_var(var)
                     self.grille[i][j] = f"var({i},{j})"
-
+#Suite de la classe Sudokus_PSC
     def creation_des_contraintes(self, grille):
         for ligne in grille :
             ligne2=ligne.copy()
@@ -328,9 +329,8 @@ class Sudokus_PSC(PSC):
                             c = Contrainte_binaire(var,"!=",var2)
                             if not c in self.contraintes_binaires :
                                 self.contraintes_binaires.append(c)
-                        
+#Suite de la classe Sudokus_PSC                        
     def creation_de_toutes_les_contraintes(self):
-        
         self.creation_des_variables()
         
         lignes = self.lignes()
@@ -341,9 +341,6 @@ class Sudokus_PSC(PSC):
         self.creation_des_contraintes(colonnes)
         self.creation_des_contraintes(carres)
         
-        #variables.consistance_des_noeuds(contraintes.contraintes)
-        #contraintes.consistance_des_arcs()
-
     def solution_sudoku(self):
         
         if not self.grille_valide() :
@@ -353,7 +350,7 @@ class Sudokus_PSC(PSC):
         
         self.consistance_contraintes_unaires()
         
-        sol = self.forward_checking(0)
+        sol = self.forward_checking(0) # ou self.backward(0) 
         
         if not sol == "echec":        
             for var in self.variables:
