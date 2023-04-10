@@ -11,31 +11,35 @@ Modélisation des variables et des contraintes
 Tout d'abord, nous allons modéliser les variables et les contraintes d'un PSC 
 en créant leurs classes respectives. Cette section est inspirée en partie de :cite:`Ia_par_la_pratique`.
 
-Premièrement, nous définissons la classe :code:`Variable` : elle possède les attibuts :code:`nom`, :code:`domaine` et 
-:code:`valeur` (actuelle).
-De plus, elle contient plusieurs méthodes : :code:`metAJourValeur` met à jour la valeur de la variable, :code:`nomEstEgal` vérifie
-que le nom donné en paramètre est le même que celui de la variable et :code:`__repr__` retourne le nom de la variable, sa 
-valeur et son domaine dans une chaîne de caractère.
+Premièrement, nous définissons la classe :code:`Variable` : elle possède les attibuts :code:`nom`, :code:`domaine`,
+:code:`valeur` (actuelle) et :code:`label`, qui est initalement une copie du domaine.
+De plus, elle contient plusieurs méthodes : :code:`metAJourValeur` met à jour la valeur de la variable, 
+:code:`enleve_du_label` supprime la valeur rentrée en paramètre
+du label et :code:`__repr__` retourne le nom de la variable, son domaine et sa 
+valeur dans une chaîne de caractère.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 4-8, 18-24, 31-33
+    :lines: 5-21
     :linenos:
  
 Deuxièmement, la classe :code:`Contrainte` doit aussi être définie. Cependant, elle ne sera jamais directement utilisée
 et sera héritée par les classes plus spécifiques :code:`ContrainteUnaire` et :code:`ContrainteBinaire` : il s'agit donc
-d'une classe abstraite. Son unique attibut 
-:code:`variables` contient la liste des variables sur lesquelles porte la contrainte. Sa méthode :code:`dimension` retourne 
-le nombre de variables sur lesquelles elle agit, :code:`estValide` teste si la contrainte est respectée en choisissant la 
-valeur :code:`val` pour la variable :code:`var` et :code:`__repr__` retourne la représentation sous format str de la contrainte.
+d'une classe abstraite. Son attribut 
+:code:`variables` contient la liste des variables sur lesquelles porte la contrainte et
+:code:`dimension` détermine 
+le nombre de variables sur lesquelles elle agit. La méthode
+:code:`estValide` teste si la contrainte est respectée en choisissant la 
+valeur :code:`val` pour la variable :code:`var` et :code:`__repr__` retourne 
+la représentation sous format :code:`str` de la contrainte.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 35-47
+    :lines: 23-34
     :linenos:
 
 Désormais, nous devons donc modéliser la classe fille :code:`ContrainteUnaire` qui s'applique aux contraintes portant
 sur une seule variable. La liste des variables ne contiendra donc que le nom de la variable impliquée dans la contrainte 
-:code:`refVar` prise en 
-paramètre lors de l'instanciation. Cette classe contient également les attirbuts :code:`op`, l'opérateur de la contrainte
+:code:`refVar` prise en paramètre lors de l'instanciation et la dimension vaudra logiquement 1.
+Cette classe contient également les attributs :code:`op`, l'opérateur de la contrainte
 (<,<=,>,>=,==,!=), la valeur de référence pour l'opérateur :code:`ref`, et la variable :code:`refVar`. Puis, on redéfinit les méthodes
 de la classe :code:`Contrainte` : :code:`dimension` retourne logiquement 1 et :code:`__repr__` retourne la variable impliquée,
 l'opérateur et la valeur de référence. Pour la méthode :code:`estValide`, on doit d'abord stocker la valeur actuelle de la variabe 
@@ -43,7 +47,7 @@ et la mettre à jour avec la valeur rentrée en paramètre. Ensuite, on teste ce
 à l'opérateur et à la valeur de référence. Finalement, il faut remettre à jour la valeur initiale de la variable.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 49-59, 61-86
+    :lines: 43-77
     :linenos:
 
 On implémente la classe :code:`ContrainteBinaire` de manière semblable à la classe :code:`ContrainteUnaire`. Cette fois, 
@@ -53,17 +57,23 @@ que l'opérateur :code:`op` et la dimension de ces contraintes est de 2. Le fonc
 :code:`estValide`.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 88-125
+    :lines: 79-113
     :linenos:
 
-A présent, il s'agit d'implémenter la classe :code:`Variables` qui gère l'ensemble des variables présentes dans un 
-problème de satisfaction de contraintes. Elle possède un seul attibut : la liste des variables, vide lors de 
-l'instanciation. Afin de la remplir, on utilise la méthode :code:`ajouteVar`. Puis, :code:`retourneVar` permet de retourner 
+A présent, il s'agit d'implémenter la classe :code:`PSC` qui gère l'ensemble d'un problème 
+de satisfaction de contraintes. Elle possède les attributs suivants :
+:code:`variables` qui contient la liste des variables, le dictionaire 
+:code:`noms_variables` ayant pour clés les noms des variables et pour valeurs les 
+variables elles-mêmes, les listes :code:`contraintes_binaires` et :code:`contraintes_unaires`
+contenant toutes les contraintes du PSC. Puis,
+on utilise la méthode :code:`ajouteVar` qui ajoute la 
+variable :code:`var` dans :code:`variables`et qui remplit
+:code:`noms_variables`. Puis, :code:`retourneVar` permet de retourner 
 une variable d'après son nom. La méthode :code:`__repr__` quant à elle retourne une chaîne de caractères contenant toutes
 les informations sur chaque variable.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 151-162, 173-178
+    :lines: 139-162, 173-178
     :linenos:
 
 Comme pour les variables, on définit également une classe :code:`Contraintes` qui s'occupe de l'ensemble des contraintes 
