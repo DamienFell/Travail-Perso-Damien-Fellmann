@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import copy
 import math
-
+from timeit import default_timer as timer
 class Variable :
     def __init__(self, nom, domaine, valeur = None):
         self.nom = nom
@@ -12,7 +12,7 @@ class Variable :
     def met_a_jour_valeur(self, val) : 
         self.valeur = val
 
-    def enleve_du_label(self, val)
+    def enleve_du_label(self, val):
         if d in self.label :
             self.label.remove(val)
                 
@@ -111,30 +111,31 @@ class Contrainte_binaire(Contrainte):
     def __repr__(self) :
         string = f"Contrainte_binaire(refVar1={self.refVar1}, op={self.op}, refVar2={self.refVar2})"
         return string
-
-    def est_possible(self, var): #Détermine si la contrainte peut être satisfaite pour au moins une valeur du domaine
-        if len(var.domaine) == 0:
+#Suite de la classe Contrainte_binaire
+    def est_possible(self, var): 
+        if len(var.label) == 0:
             return False
         
-        for d in var.domaine:
-            if self.est_valide(var, d):
-                return True #sSi au moins une valeur convient
+        for val in var.label:
+            if self.est_valide(var, val):
+                return True 
         
-        return False #Si aucune valeur ne convient
+        return False 
     
-    def reviser(self):
-        modifiee = False
+    def modifier_labels(self):
+        modification = False
         
         for paire in [[self.refVar1,self.refVar2],[self.refVar2,self.refVar1]]:
-            for x in paire[0].domaine : #Test avec chaque valeur de la première variable
-                paire[0].met_a_jour_valeur(x)
+            for val in paire[0].label :
+                paire[0].met_a_jour_valeur(val)
                 
-                if not self.est_possible(paire[1]): #Si la valeur ne peut pas satisfaire la contrainte, on l'enlève du domaine
-                    paire[0].domaine.remove(x)
+                if not self.est_possible(paire[1]): 
+                    paire[0].label.remove(val)
                     modifiee = True
             
             paire[0].met_a_jour_valeur(None)
-        return modifiee
+        
+        return modification
 
 class PSC :
     def __init__(self):
@@ -169,17 +170,34 @@ class PSC :
             for val in c.refVar.label :
                 if not c.est_valide(c.refVar,val) :
                     c.refVar.label.remove(val)
-    
-    def consistance_des_arcs(self):
+#Suite de la classe PSC     
+    def consistance_contraintes_binaires(self):
         refaire = False
-        for c in self.contraintes:
-            if c.dimension == 2 and c.reviser():
+        for c in self.contraintes_binaires:
+            if c.modifier_labels():
                 refaire == True
-        if refaire : #Si on peut peut-être encore supprimer des valeurs des domaines, on refait l'algorithme.
+        if refaire : 
             self.consistance_des_arcs()
+#Suite de la classe PSC
+    def sort_variables(self):
+        self.variables.sort(key=lambda var : len(var.label))
+#Suite de la classe PSC
+    def dynamic_ordering(self,k):
+        indice_plus_petit_label = k
+        taille_min = len(self.variables[k].label)
+        
+        for i in range(k+1,len(self.variables)):
+            if len(self.variables[i].label)<taille_min:
+                indice_plus_petit_label = i
+                taille_min = len(self.variables[i].label)
+                
+        if indice_plus_petit_label != k:
+            self.variables[k], self.variables[indice_plus_petit_label] = self.variables[indice_plus_petit_label], self.variables[k]
+            
+            
 #Suite de la classe PSC 
     def consistance_avec_vars_precedentes(self, k): 
-        for c in contraintes_binaires :                                
+        for c in self.contraintes_binaires :                                
             if self.variables[k] in c.variables:
                 for i in range(0,k+1):
                     if self.variables[i] in c.variables :
@@ -208,7 +226,7 @@ class PSC :
         else :
             var = self.variables[k]
             
-            for val in var.domaine: 
+            for val in var.label: 
                 var.met_a_jour_valeur(val)
                 if self.consistance_avec_vars_precedentes(k):
                     reste = self.backtrack(k+1, iterations)
@@ -256,6 +274,8 @@ class PSC :
             for val in var.label:
                 var.met_a_jour_valeur(val)
                 if self.propagation_aux_vars_suivantes(k):
+                    if k < len(self.variables)-1:
+                        self.dynamic_ordering(k+1)
                     reste = self.forward_checking(k+1, iterations)
                     if reste != "echec":
                         return reste
@@ -271,8 +291,8 @@ class Sudokus_PSC(PSC):
     
     def __init__(self, grille):
         PSC.__init__(self)
-        self.grille = grille
-#Suite de la classe Sudokus_PS    
+        self.grille = copy.deepcopy(grille)
+#Suite de la classe Sudokus_PSC    
     def grille_valide(self):
         for ligne in self.grille :
             if not len(ligne) == len(self.grille):
@@ -307,7 +327,7 @@ class Sudokus_PSC(PSC):
         domaine = list(range(1,len(self.grille)+1))
         for i in range(len(self.grille)) :
             for j in range(len(self.grille)) :
-                if self.grille[i][j] == "x":
+                if self.grille[i][j] == ".":
                     var = Variable(f"var({i},{j})",domaine)
                     self.ajoute_var(var)
                     self.grille[i][j] = f"var({i},{j})"
@@ -341,7 +361,7 @@ class Sudokus_PSC(PSC):
         self.creation_des_contraintes(colonnes)
         self.creation_des_contraintes(carres)
         
-    def solution_sudoku(self):
+    def solution_sudoku(self,algo,show = True):
         
         if not self.grille_valide() :
             raise Exception("La grille n'est pas valide")
@@ -350,32 +370,87 @@ class Sudokus_PSC(PSC):
         
         self.consistance_contraintes_unaires()
         
-        sol = self.forward_checking(0) # ou self.backward(0) 
+        self.consistance_contraintes_binaires()
         
-        if not sol == "echec":        
-            for var in self.variables:
-                    i = int(var.nom[4])
-                    j = int(var.nom[6])
-                    self.grille[i][j] = var.valeur
-                
-            print(self.grille)
+        self.sort_variables()
         
-        else :
-            print("Ce sudoku n'a pas de solution")
+        sol = algo(0)
         
-grille1=[[1,"x",3,4],[1,"x",3,4],[1,"x",3,4],[1,"x",3,4]]
-grille2 = [[5,4,"x","x",2,"x",8,"x",6],
-           ["x",1,9,"x","x",7,"x","x",3],
-           ["x","x","x",3,"x","x",2,1,"x"],
-           [9,"x","x",4,"x",5,"x",2,"x",],
-           ["x","x",1,"x","x","x",6,"x",4],
-           [6,"x",4,"x",3,2,"x",8,"x"],
-           ["x",6,"x","x","x","x",1,9,"x"],
-           [4,"x",2,"x","x",9,"x","x",5],
-           ["x",9,"x","x",7,"x",4,"x",2]
+        if show :
+            if not sol == "echec":        
+                for var in self.variables:
+                        i = int(var.nom[4])
+                        j = int(var.nom[6])
+                        self.grille[i][j] = var.valeur
+                    
+                print(self.grille)
+            
+            else :
+                print("Ce sudoku n'a pas de solution")
+
+def lines_to_sudokus(lines):
+    sudokus_grids = int(len(lines)/11) * [None] #Création de la liste contenant
+                                                #toutes les grilles
+    for i in range(int(len(lines)/11)):
+        grid =9*[None]
+        for j in range(9):
+            grid[j]=list(lines[11*i+j])[:9]     #11*i car il y a entre chaque grille
+            for k in range(9):                  #deux retours à la ligne, et [:9] car
+                el = grid[j][k]                 #le dernier caractère de chaque ligne 
+                if el != ".":                   #est un "\n".
+                    grid[j][k] = int(el)
+            
+        sudokus_grids[i]=grid
+    
+    return sudokus_grids
+
+def chronometre(lines):
+    grids = lines_to_sudokus(lines)
+    backtrack_times = [None]*len(grids)
+    forward_checking_times = [None]*len(grids)
+    
+    for i in range(len(grids)):
+        grid = grids[i]
+        
+        start = timer()
+        psc1 =Sudokus_PSC(grid)
+        psc1.solution_sudoku(psc1.backtrack,False)
+        end = timer()
+        backtrack_times[i] = end-start
+        print("1 : okay")
+        
+        start = timer()
+        psc2 =Sudokus_PSC(grid)
+        psc2.solution_sudoku(psc2.forward_checking,False)
+        end = timer()
+        forward_checking_times[i] = end-start
+        print("2 : okay")
+        
+    print(backtrack_times)
+    print(forward_checking_times)
+
+grille1=[[1,".",3,4],[1,".",3,4],[1,".",3,4],[1,".",3,4]]
+grille2 = [[5,4,".",".",2,".",8,".",6],
+           [".",1,9,".",".",7,".",".",3],
+           [".",".",".",3,".",".",2,1,"."],
+           [9,".",".",4,".",5,".",2,".",],
+           [".",".",1,".",".",".",6,".",4],
+           [6,".",4,".",3,2,".",8,"."],
+           [".",6,".",".",".",".",1,9,"."],
+           [4,".",2,".",".",9,".",".",5],
+           [".",9,".",".",7,".",4,".",2]
            ]
 
+file = open("sudokus.txt", "r")
 
-psc2 = Sudokus_PSC(grille2)
-psc2.solution_sudoku()
-#solution_sudoku(grille1)
+lines = file.readlines()
+
+file.close()
+
+#sudokus = lines_to_sudokus(lines)
+
+#chronometre(lines)
+
+
+psc = Sudokus_PSC(grille2)
+psc.solution_sudoku(psc.forward_checking)

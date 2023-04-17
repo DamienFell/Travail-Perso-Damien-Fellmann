@@ -74,16 +74,50 @@ une chaîne de caractères contenant toutes les informations sur chaque variable
 chaque contrainte.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 139-162
+    :lines: 140-162
     :linenos:
 
-On définit la méthode :code:`consistance_contraintes_unaires` afin de réduire les 
-labels de chaque variable en enlevant toutes les valeurs inconcistantes par rapport
+Modélisation des algorhithmes de pré-résolution
+=============================================
+
+Dans cette sous-section, on implémente les méthodes de pré-résolution présentées 
+précédemment. 
+
+On définit d'abord la méthode :code:`consistance_contraintes_unaires` afin de réduire les 
+labels de chaque variable en enlevant toutes les valeurs inconsistantes par rapport
 aux contraintes unaires, ce qui signifie que les algorhitmes de backtracking et de
 forward checking n'utiliseront ensuite que les contraintes binaires.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 166-171
+    :lines: 167-173
+    :linenos:
+
+La consistance par rapport aux contraintes binaires est implémentée de la manière 
+suivante. D'abord, on définit au sein de la classe :code:`Contrainte_binaire` une 
+méthode :code:`modifier_labels` qui supprime les valeurs inconsistances entre les
+deux variables d'une contrainte binaire. Elle examine une par une chaque valeur 
+des labels des deux variables et utilise la méthode :code:`est_possible` pour déterminer 
+s'il existe au moins une valeur de l'autre variable consistante avec la valeur
+testée. A la fin, :code:`modifier_labels` retourne un booléen signifiant si les 
+labels ont été réduits ou non. 
+
+..  literalinclude:: scripts/algorithme_sudokus.py
+    :lines: 114-138
+    :linenos:
+
+Ensuite, la méthode :code:`consistance_contraintes_binaires` effectue 
+:code:`modifier_labels` sur chaque contrainte et si au moins une contrainte
+a modifié des labels, on réexécute l'algorithme. 
+
+..  literalinclude:: scripts/algorithme_sudokus.py
+    :lines: 173-180
+    :linenos:
+
+Pour effectuer le tri initial des variables, on utilise la  méthode sort sur la liste 
+des variables qui effectue le tri par rapport à la taille des labels.
+
+..  literalinclude:: scripts/algorithme_sudokus.py
+    :lines: 181-183
     :linenos:
 
 Algorithme de backtracking
@@ -104,7 +138,7 @@ retourne un dictionnaire contenant les noms des variables et leur valeur. Cepend
 fonctionne, l'algorithme retourne "echec".
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 180-219
+    :lines: 198-237
     :linenos:
 
 Afin de mieux comprendre l'algorithme de backtracking, prenons l'exemple du PSC de la 
@@ -143,10 +177,14 @@ avec les contraintes suivantes. Sinon, la
 retourne :code:`False` et on s'arrête
 , car on ne peut pas continuer la recherche avec un label vide, et on remet 
 à jour les labels avec la variable :code:`anciens_labels` et la fonction
-:code:`met_a_jour_labels`.
+:code:`met_a_jour_labels`. De plus, avant de réappeler le :code:`forward_checking`
+avec l'indice :code:`k+1`, on réorganise légèrement la liste des variables avec la 
+méthode :code:`dynamic_ordering` qui échange la variable d'indice `k+1` avec une
+variable avec le plus petit label afin d'effectuer l'algorhithme  de forward checking
+de l'étape suivante avec une variable la plus restrictive.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 220-266
+    :lines: 184-196, 239-286
     :linenos:
 
 Application à la résolution de sudokus
@@ -163,10 +201,10 @@ d'une même ligne, d'une même colonne ou d'un même carré ne doit pas avoir la
 Pour y parvenir, nous allons développer la classe :code:`Sudokus_PSC` qui est une classe
 fille de la classe :code:`PSC`. Lors de son instanciation, elle prend comme attribut la grille 
 de sudoku qu'il faut résoudre, sous forme de liste de listes qui sont 
-les lignes de la grille, avec des "x" pour les valeurs inconnues.
+les lignes de la grille, avec des "." pour les valeurs inconnues.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 270-274
+    :lines: 290-294
     :linenos:
     
 La prochaine étape consiste ensuite à implémenter les méthodes 
@@ -174,40 +212,40 @@ La prochaine étape consiste ensuite à implémenter les méthodes
 retournent des listes de listes qui sont les lignes, colonnes ou carrés de la grille.
 
 Pour illustrer cela, voici ci-dessous une grille de sudokus qui correspond à la liste
-:code:`[[5,1,4,8,x,6,x,x,9],
-[x,x,6,x,5,x,x,x,x],
-[x,3,8,x,1,9,6,4,x],
-[6,x,x,4,8,x,5,x,x],
-[4,8,x,9,x,x,7,6,x],
-[3,7,9,5,x,1,x,8,x],
-[9,6,x,7,4,x,1,3,x],
-[x,x,x,x,x,8,x,x,2],
-[x,x,3,x,9,x,4,7,x]]` (les :code:`x` sont en réalité des :code:`"x"`) :
+:code:`[[5,1,4,8,.,6,.,.,9],
+[.,.,6,.,5,.,.,.,.],
+[.,3,8,.,1,9,6,4,.],
+[6,.,.,4,8,.,5,.,.],
+[4,8,.,9,.,.,7,6,.],
+[3,7,9,5,.,1,.,8,.],
+[9,6,.,7,4,.,1,3,.],
+[.,.,.,.,.,8,.,.,2],
+[.,.,3,.,9,.,4,7,.]]` (les :code:`.` sont en réalité des :code:`"."`) :
 
 .. figure:: exemple_sudoku.png
     
     Exemple de sudoku tiré de :cite:`1000_sudokus`
 
 En vert est mise en évidence la première ligne de la liste retournée par la fonction :code:`lignes`,
-représentée par la liste :code:`[5,1,4,8,x,6,x,x,9]`, en
+représentée par la liste :code:`[5,1,4,8,.,6,.,.,9]`, en
 bleu la première colonne de la fonction :code:`colonnes` représentée par la liste 
-:code:`[5,x,x,6,4,3,9,x,x]` et en orange le premier carré de la fonction 
-:code:`carres` représenté par la liste :code:`[5,1,4,x,x,6,x,3,8]`.
+:code:`[5,.,.,6,4,3,9,.,.]` et en orange le premier carré de la fonction 
+:code:`carres` représenté par la liste :code:`[5,1,4,.,.,6,.,3,8]`.
 
 Voici donc le code implémentant ces trois méthodes :
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 281-304
+    :lines: 301-324
     :linenos:
 
 Ensuite, à partir de la grille de sudoku, on peut créer les variables pour chaque case contenant un 
-"x". Leur nom est composé de l'indice :code:`i` de la ligne et de l'indice :code:`j` de la colonne d'où elles se 
+".". Leur nom est composé de l'indice :code:`i` de la ligne et de l'indice :code:`j` de la colonne d'où elles se 
 trouvent dans la grille. En plus de créer ces variables et de les ajouter à la liste des variables,
-on remplace également les "x" de la grille
+on remplace également les "." de la grille
 par les noms des variables.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 305-313
+    :lines: 325-333
     :linenos:
 
 Pour instancier les contraintes, on implémente la méthode :code:`creation_des_contraintes` qui prend dans le
@@ -222,7 +260,7 @@ des contraintes (cette étape est surtout nécessaire lorsqu'on rajoute les cont
 ont souvent déjà été ajoutées lors des appels de la fonction avec les lignes et les colonnes).
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 314-332
+    :lines: 334-351
     :linenos:
 
 Puis, la méthode:code:`creation_de_toutes_les_contraintes` génère l'ensemble des 
@@ -233,7 +271,7 @@ les listes des lignes, colonnes et carrés avec lesquelles peuvent être génér
 toutes les contraintes. 
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 332-342
+    :lines: 352-362
     :linenos:
 
 Finalement, il est l'heure de définir la méthode :code:`solution_sudoku` qui doit 
@@ -242,13 +280,16 @@ toute grille de sudoku réalisable. On commence par contrôler que la grille de 
 est dans les normes avec la méthode :code:`grille_valide`, qui vérifie si chaque ligne
 a le même nombre d'éléments que la grille a de lignes. 
 Puis, on appelle la méthode :code:`creation_de_toutes_les_contraintes` qui appelle
-aussi la méthpde :code:`creation_des_variables`. On peut ensuite utiliser l'algorithme
+aussi la méthpde :code:`creation_des_variables`. On réduit ensuite la taille des
+labels avec les trois méthodes :code:`consistance_contraintes_unaires`,
+:code:`consistance_contraintes_binaires` et :code:`sort_variables`.
+On peut ensuite utiliser l'algorithme
 de recherche en profondeur d'abord :code:`backtrack` ou l'algorhitme
-de forward checking. Si la recherche a été fructueuse, on
+de forward checking qu'on détermine en paramètre. Si la recherche a été fructueuse, on
 insère les valeurs valides des variables dans la grille et on l'imprime, sinon on 
 imprime un message indiquant que le sudoku ne peut pas être résolu, ce qui signifie
 qu'il n'a pas été généré correctement.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 275-280, 343-364
+    :lines: 295-300, 363-389
     :linenos:

@@ -125,3 +125,71 @@ du forward checking.
 On remarque que le nombre d'étapes nécessaires diminue déjà pour un problème facile à résoudre. On peut
 dès lors s'imaginer que cette amélioration sera très bénéfique 
 pour la résolution d'un problème plus complexe comme celui des sudokus.
+
+
+Méthodes de pré-résolution
+..........................
+
+Les deux algorithmes présentés précédemment sont efficaces mais peuvent 
+quand même s'exécuter avec un très grand nombre d'itérations qui peut être
+réduit s'il on applique d'autres algorhithmes avant leur utilisation
+
+Consistance par rapport aux contraintes unaires
+,,,,,
+
+Tout d'abord, on peut réduire la taille des labels des 
+variables en éliminant toutes leurs valeurs inconsistantes par rapport aux 
+variables unaires, si bien qu'après cette étape, il n'y aura plus besoin 
+d'utiliser les contraintres unaires dans les autres algorhithmes car elles 
+seront en quelque sorte déjà intégrées dans les labels réduits 
+des variables.
+
+Consistance par rapport aux contraintes binaires
+,,,,,
+
+Ensuite, on peut encore réduire le nombre de valeurs dans les labels en 
+analysant les contraintes binaires : pour chacune des deux variables de chaque 
+contrainte binaire, on teste s'il existe au moins une valeur compatible avec 
+chaque valeur de l'autre variable et si il n'y en a pas, on supprime la valeur
+de l'autre variable de son label. Cette méthode est l'algorithme de Waltz.
+
+Afin de mieux comprendre, imaginons un PSC dans lequel il existe une contrainte
+binaire entre une variable :math:`x_1` avec son domaine :math:`d_1 = \{ a,d,g,h \}`
+et une variable :math:`x_2` avec son domaine :math:`d_2 = \{ b,c,d,e,g \}`, qui leur 
+impose d'avoir la même valeur. On décide de leur appliquer la méthode présentée 
+ci-dessus et on s'apperçoit qu'à la fin, les deux labels sont égaux, ce qui correspond
+à ce que dicte la contrainte :
+
+..  csv-table:: Exemple de la consistance par rapport aux contraintes binaires
+    :header: "Etape", "Variable", "Valeur testée", ":math:`l_1`", ":math:`l_2`"
+    :widths: 5, 10, 10, 10, 10
+
+    1,:math:`x_1`, :math:`a`, :math:`\{ a;d;g;h \}` -> :math:`\{ d;g;h \}` , :math:`\{ b;c;d;e;g \}`
+    2,:math:`x_1`, :math:`d`, :math:`\{ d;g;h \}`, :math:`\{ b;c;d;e;g \}`
+    3,:math:`x_1`, :math:`g`, :math:`\{ d;g;h \}`, :math:`\{ b;c;d;e;g \}`
+    4,:math:`x_1`, :math:`h`, :math:`\{ d;g;h \}` -> :math:`\{ d;g \}`, :math:`\{ b;c;d;e;g \}`
+    5,:math:`x_2`, :math:`b`, :math:`\{ d;g \}`, :math:`\{ b;c;d;e;g \}` -> :math:`\{ c;d;e;g \}`
+    6,:math:`x_2`, :math:`c`, :math:`\{ d;g \}`, :math:`\{ c;d;e;g \}` -> :math:`\{ d;e;g \}`
+    7,:math:`x_2` ,:math:`d`, :math:`\{ d;g \}`, :math:`\{ d;e;g \}`
+    8,:math:`x_2` ,:math:`e`, :math:`\{ d;g \}`, :math:`\{ d;e;g \}` -> :math:`\{ d;g \}`
+    9,:math:`x_2` ,:math:`g`, :math:`\{ d;g \}`, :math:`\{ d;g \}`
+
+Cependant, après avoir passé en revue toutes les contraintes, il est également nécessaire de 
+réeffectuer le même processus car certaines réductions des labels affectent aussi les autres variables
+auxquelles est liée chaque variable. La consistance par rapport aux contraintes binaires est donc 
+atteinte seulement quand l'algorhithme n'a plus aucun effet sur les labels.
+
+Tri des variable
+,,,,,,,,,,,,,,,
+
+Puis, maintenant que la taille des labels a diminué, on peut mettre dans l'ordre
+la liste des variables car elle influence la rapidité des algorhithmes de backtracking
+ou de forward checking. En effet, la profondeur de l'arbre de rechercher est 
+déterminée à chaque étape par la variable actuelle. On va donc trier les variables
+de manière à tester les valeurs des variables avec les labels les plus petits 
+d'abord : celles-ci sont les plus resttictives parce qu'ayant moins de valeurs
+possibles, elles ont le plus de chances d'aboutir à des inconsistances.
+
+En plus d'effectuer un tri avant de débuter les algorhithmes de résolution, on peut
+aussi effectuer des tris pendant la résolution pour prendre à chaque étape la 
+variable avec le plus petit label.
