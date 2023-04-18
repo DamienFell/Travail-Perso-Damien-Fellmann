@@ -134,7 +134,7 @@ Les deux algorithmes présentés précédemment sont efficaces mais peuvent
 quand même s'exécuter avec un très grand nombre d'itérations qui peut être
 réduit s'il on applique d'autres algorhithmes avant leur utilisation
 
-Consistance par rapport aux contraintes unaires
+Consistance des noeuds
 ,,,,,
 
 Tout d'abord, on peut réduire la taille des labels des 
@@ -142,13 +142,13 @@ variables en éliminant toutes leurs valeurs inconsistantes par rapport aux
 variables unaires, si bien qu'après cette étape, il n'y aura plus besoin 
 d'utiliser les contraintres unaires dans les autres algorhithmes car elles 
 seront en quelque sorte déjà intégrées dans les labels réduits 
-des variables.
+des variables. On appelle ce principe la consistance des noeuds.
 
-Consistance par rapport aux contraintes binaires
+Consistance des arcs
 ,,,,,
 
 Ensuite, on peut encore réduire le nombre de valeurs dans les labels en 
-analysant les contraintes binaires : pour chacune des deux variables de chaque 
+analysant les contraintes binaires avec la consistance des arcs : pour chacune des deux variables de chaque 
 contrainte binaire, on teste s'il existe au moins une valeur compatible avec 
 chaque valeur de l'autre variable et si il n'y en a pas, on supprime la valeur
 de l'autre variable de son label. Cette méthode est l'algorithme de Waltz.

@@ -3,6 +3,10 @@
 Introduction
 ############
 
+.. figure:: Image_sudoku.jpg
+    :figwidth: 30%
+    :align: right
+
 Résoudre un sudoku demande de la patience et de
 la stratégie et il n'est pas toujours évident
 d'en trouver la solution. Ce jeu basé sur la logique

@@ -188,6 +188,15 @@ de l'étape suivante avec une variable la plus restrictive.
     :lines: 35-42, 184-196, 239-284
     :linenos:
 
+Comme pour la méthode du retour-arrière, voici ci-dessous la pseudo-exécution
+de l'algorithme de forward checking pour le PSC de la 
+:numref:`reseau`.
+
+.. figure:: forwardcheck_exec.png
+    :align: left
+    
+    Pseudo-exécution de l'algorithme de forward checking du PSC de la :numref:`reseau`
+
 Application à la résolution de sudokus
 ======================================
 
