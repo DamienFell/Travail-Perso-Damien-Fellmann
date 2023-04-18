@@ -32,7 +32,7 @@ class Contrainte(ABC):
     @abstractmethod
     def __repr__(self): 
         pass
-    
+#Suite de la classe Contrainte_binaire    
     def propage(self, var):
         for val in var.label :
             if not self.est_valide(var,val):
@@ -136,13 +136,13 @@ class Contrainte_binaire(Contrainte):
             paire[0].met_a_jour_valeur(None)
         
         return modification
-
 class PSC :
     def __init__(self):
         self.variables = []
         self.noms_variables = {}
         self.contraintes_binaires = []
         self.contraintes_unaires = []
+        self.iterations = 0
 
     def ajoute_var(self, var):
         self.variables.append(var)
@@ -215,10 +215,8 @@ class PSC :
         
         return solution
 
-    def backtrack(self, k, iterations = 0):
-        algo="bt"
-        
-        iterations +=1
+    def backtrack(self, k):
+        self.iterations +=1
         
         if k>=len(self.variables):
             return self.retourne_solution()
@@ -229,12 +227,14 @@ class PSC :
             for val in var.label: 
                 var.met_a_jour_valeur(val)
                 if self.consistance_avec_vars_precedentes(k):
-                    reste = self.backtrack(k+1, iterations)
+                    reste = self.backtrack(k+1)
                     if reste != "echec":
                         return reste
         
         var.met_a_jour_valeur(None)
         return "echec"    
+
+
 #Suite de la classe PSC 
     def propagation_aux_vars_suivantes(self, k):
         for c in self.contraintes_binaires :
@@ -259,10 +259,8 @@ class PSC :
         for var in self.variables[k+1:]:
             var.label = copy.deepcopy(labels[var])
 
-    def forward_checking(self, k, iterations = 0):
-        algo="fc"
-        
-        iterations +=1
+    def forward_checking(self, k):       
+        self.iterations +=1
         
         if k>=len(self.variables):
             return self.retourne_solution()
@@ -276,7 +274,7 @@ class PSC :
                 if self.propagation_aux_vars_suivantes(k):
                     if k < len(self.variables)-1:
                         self.dynamic_ordering(k+1)
-                    reste = self.forward_checking(k+1, iterations)
+                    reste = self.forward_checking(k+1)
                     if reste != "echec":
                         return reste
                     
@@ -284,7 +282,9 @@ class PSC :
         
         var.met_a_jour_valeur(None)
         return "echec"    
-        
+
+
+
 ###############################################################################################################################################################
 
 class Sudokus_PSC(PSC):
@@ -292,6 +292,17 @@ class Sudokus_PSC(PSC):
     def __init__(self, grille):
         PSC.__init__(self)
         self.grille = copy.deepcopy(grille)
+        
+        if not self.grille_valide() :
+            raise Exception("La grille n'est pas valide")
+        
+        self.creation_de_toutes_les_contraintes()
+        
+        self.consistance_contraintes_unaires()
+        
+        self.consistance_contraintes_binaires()
+        
+        self.sort_variables()
 #Suite de la classe Sudokus_PSC    
     def grille_valide(self):
         for ligne in self.grille :
@@ -362,18 +373,6 @@ class Sudokus_PSC(PSC):
         self.creation_des_contraintes(carres)
         
     def solution_sudoku(self,algo,show = True):
-        
-        if not self.grille_valide() :
-            raise Exception("La grille n'est pas valide")
-
-        self.creation_de_toutes_les_contraintes()
-        
-        self.consistance_contraintes_unaires()
-        
-        self.consistance_contraintes_binaires()
-        
-        self.sort_variables()
-        
         sol = algo(0)
         
         if show :
@@ -406,40 +405,26 @@ def lines_to_sudokus(lines):
 
 def chronometre(lines):
     grids = lines_to_sudokus(lines)
-    backtrack_times = [None]*len(grids)
-    forward_checking_times = [None]*len(grids)
     
-    for i in range(len(grids)):
-        grid = grids[i]
+    for grid in grids:
         
+        psc = Sudokus_PSC(grid)
         start = timer()
-        psc1 =Sudokus_PSC(grid)
-        psc1.solution_sudoku(psc1.backtrack,False)
+        psc.solution_sudoku(psc.forward_checking,False)
         end = timer()
-        backtrack_times[i] = end-start
-        print("1 : okay")
         
+        print(f"{end-start};{psc.iterations}")
+     
+    print("-------------------------------------------------------------------------------") 
+     
+    for grid in grids:
+        
+        psc = Sudokus_PSC(grid)
         start = timer()
-        psc2 =Sudokus_PSC(grid)
-        psc2.solution_sudoku(psc2.forward_checking,False)
+        psc.solution_sudoku(psc.backtrack,False)
         end = timer()
-        forward_checking_times[i] = end-start
-        print("2 : okay")
         
-    print(backtrack_times)
-    print(forward_checking_times)
-
-grille1=[[1,".",3,4],[1,".",3,4],[1,".",3,4],[1,".",3,4]]
-grille2 = [[5,4,".",".",2,".",8,".",6],
-           [".",1,9,".",".",7,".",".",3],
-           [".",".",".",3,".",".",2,1,"."],
-           [9,".",".",4,".",5,".",2,".",],
-           [".",".",1,".",".",".",6,".",4],
-           [6,".",4,".",3,2,".",8,"."],
-           [".",6,".",".",".",".",1,9,"."],
-           [4,".",2,".",".",9,".",".",5],
-           [".",9,".",".",7,".",4,".",2]
-           ]
+        print(f"{end-start};{psc.iterations}")
 
 file = open("sudokus.txt", "r")
 
@@ -447,9 +432,7 @@ lines = file.readlines()
 
 file.close()
 
-#sudokus = lines_to_sudokus(lines)
-
-#chronometre(lines)
+chronometre(lines)
 
 
 psc = Sudokus_PSC(grille2)
