@@ -1,13 +1,10 @@
 .. _references.rst:
 
-..  only:: html
+Références
+===========================
 
-    Bibliographie et webographie
-    ##########
-
-..  only:: html
-    
-    ..  rubric:: Livres
+Bibliographie
+,,,,,,,,,,,,,,,
 
 ..  bibliography:: books.bib
     :all:
@@ -16,3 +13,10 @@
 
 ..  bibliography:: articles.bib
     :all:
+
+Webographie
+,,,,,,,,,,,,,,
+
+..  bibliography:: online.bib
+    :all:
+    
