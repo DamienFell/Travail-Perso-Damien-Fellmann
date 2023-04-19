@@ -13,7 +13,7 @@ en créant leurs classes respectives. Cette section est inspirée en partie de :
 
 Premièrement, nous définissons la classe :code:`Variable` : elle possède les attibuts :code:`nom`, :code:`domaine`,
 :code:`valeur` (actuelle) et :code:`label`, qui est initalement une copie du domaine.
-De plus, elle contient plusieurs méthodes : :code:`metAJourValeur` met à jour la valeur de la variable, 
+De plus, elle contient plusieurs méthodes : :code:`met_a_jour_valeur` met à jour la valeur de la variable, 
 :code:`enleve_du_label` supprime la valeur rentrée en paramètre
 du label et :code:`__repr__` retourne le nom de la variable, son domaine et sa 
 valeur dans une chaîne de caractère.
@@ -23,12 +23,12 @@ valeur dans une chaîne de caractère.
     :linenos:
  
 Deuxièmement, la classe :code:`Contrainte` doit aussi être définie. Cependant, elle ne sera jamais directement utilisée
-et sera héritée par les classes plus spécifiques :code:`ContrainteUnaire` et :code:`ContrainteBinaire` : il s'agit donc
+et sera héritée par les classes plus spécifiques :code:`Contrainte_unaire` et :code:`Contrainte_binaire` : il s'agit donc
 d'une classe abstraite. Son attribut 
 :code:`variables` contient la liste des variables sur lesquelles porte la contrainte et
 :code:`dimension` détermine 
 le nombre de variables sur lesquelles elle agit. La méthode
-:code:`estValide` teste si la contrainte est respectée en choisissant la 
+:code:`est_valide` teste si la contrainte est respectée en choisissant la 
 valeur :code:`val` pour la variable :code:`var` et :code:`__repr__` retourne 
 la représentation sous format :code:`str` de la contrainte.
 
@@ -36,13 +36,13 @@ la représentation sous format :code:`str` de la contrainte.
     :lines: 23-34
     :linenos:
 
-Désormais, nous devons donc modéliser la classe fille :code:`ContrainteUnaire` qui s'applique aux contraintes portant
+Désormais, nous devons donc modéliser la classe fille :code:`Contrainte_unaire` qui s'applique aux contraintes portant
 sur une seule variable. La liste des variables ne contiendra donc que le nom de la variable impliquée dans la contrainte 
 :code:`refVar` prise en paramètre lors de l'instanciation et la dimension vaudra logiquement 1.
 Cette classe contient également les attributs :code:`op`, l'opérateur de la contrainte
 (<,<=,>,>=,==,!=), la valeur de référence pour l'opérateur :code:`ref`, et la variable :code:`refVar`. Puis, on redéfinit les méthodes
 de la classe :code:`Contrainte` : :code:`dimension` retourne logiquement 1 et :code:`__repr__` retourne la variable impliquée,
-l'opérateur et la valeur de référence. Pour la méthode :code:`estValide`, on doit d'abord stocker la valeur actuelle de la variabe 
+l'opérateur et la valeur de référence. Pour la méthode :code:`est_valide`, on doit d'abord stocker la valeur actuelle de la variabe 
 et la mettre à jour avec la valeur rentrée en paramètre. Ensuite, on teste cette valeur par rapport 
 à l'opérateur et à la valeur de référence. Finalement, il faut remettre à jour la valeur initiale de la variable.
 
@@ -50,11 +50,11 @@ et la mettre à jour avec la valeur rentrée en paramètre. Ensuite, on teste ce
     :lines: 43-77
     :linenos:
 
-On implémente la classe :code:`ContrainteBinaire` de manière semblable à la classe :code:`ContrainteUnaire`. Cette fois, 
+On implémente la classe :code:`Contrainte_binaire` de manière semblable à la classe :code:`Contrainte_unaire`. Cette fois, 
 la liste des variables contiendra les noms des variables :code:`refVar1` et :code:`refVar2`. Les attributs sont ces deux variables ainsi
 que l'opérateur :code:`op` et la dimension de ces contraintes est de 2. Le fonctionnement des méthodes reste le même
 à la différence que la valeur de référence :code:`ref` est remplacée par la valeur de la variable :code:`refVar2` dans la méthode
-:code:`estValide`.
+:code:`est_valide`.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
     :lines: 79-113
@@ -66,36 +66,36 @@ de satisfaction de contraintes. Elle possède les attributs suivants :
 :code:`noms_variables` ayant pour clés les noms des variables et pour valeurs les 
 variables elles-mêmes, les listes :code:`contraintes_binaires` et :code:`contraintes_unaires`
 contenant toutes les contraintes du PSC, ainsi que :code:`iterations` : le nombre
-d'appels des algorhithmes récursifs de backtracking ou de forward checking. Puis,
-on utilise la méthode :code:`ajouteVar` pour ajouter une 
+d'appels des algorithmes récursifs de backtracking ou de forward checking. Puis,
+on utilise la méthode :code:`ajoute_var` pour ajouter une 
 variable :code:`var` dans :code:`variables` et pour remplir en même temps
-:code:`noms_variables`. Ensuite, :code:`retourneVar` permet de retourner 
+:code:`noms_variables`. Ensuite, :code:`retourne_var` permet de retourner 
 une variable d'après son nom. La méthode :code:`__repr__` quant à elle retourne 
 une chaîne de caractères contenant toutes les informations sur chaque variable et
 chaque contrainte.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 139-162
+    :lines: 139-166
     :linenos:
 
-Modélisation des algorhithmes de pré-résolution
+Modélisation des algorithmes de pré-résolution
 =============================================
 
 Dans cette sous-section, on implémente les méthodes de pré-résolution présentées 
 précédemment. 
 
-On définit d'abord la méthode :code:`consistance_contraintes_unaires` afin de réduire les 
+On définit d'abord la méthode :code:`consistance_noeuds` afin de réduire les 
 labels de chaque variable en enlevant toutes les valeurs inconsistantes par rapport
-aux contraintes unaires, ce qui signifie que les algorhitmes de backtracking et de
+aux contraintes unaires, ce qui signifie que les algorithmes de backtracking et de
 forward checking n'utiliseront ensuite que les contraintes binaires.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 167-173
+    :lines: 167-172
     :linenos:
 
 La consistance par rapport aux contraintes binaires est implémentée de la manière 
 suivante. D'abord, on définit au sein de la classe :code:`Contrainte_binaire` une 
-méthode :code:`modifier_labels` qui supprime les valeurs inconsistances entre les
+méthode :code:`modifier_labels` qui supprime les valeurs inconsistantes entre les
 deux variables d'une contrainte binaire. Elle examine une par une chaque valeur 
 des labels des deux variables et utilise la méthode :code:`est_possible` pour déterminer 
 s'il existe au moins une valeur de l'autre variable consistante avec la valeur
@@ -106,7 +106,7 @@ labels ont été réduits ou non.
     :lines: 114-138
     :linenos:
 
-Ensuite, la méthode :code:`consistance_contraintes_binaires` effectue 
+Ensuite, la méthode :code:`consistance_arcs` effectue 
 :code:`modifier_labels` sur chaque contrainte et si au moins une contrainte
 a modifié des labels, on réexécute l'algorithme. 
 
@@ -125,8 +125,8 @@ Algorithme de backtracking
 ==========================
 
 Nous allons maintenant implémenter à l'intérieur de la 
-classe :code:`PSC` l'algorithme de recherche en profondeur d'abord 
-dans la méthode :code:`backtrack`. D'abord, le premier paramètre :code:`k` correspond à l'indice de la variable actuelle 
+classe :code:`PSC` l'algorithme de retour-arrière
+dans la méthode :code:`backtrack`. D'abord, le paramètre :code:`k` correspond à l'indice de la variable actuelle 
 sur laquelle on teste les valeurs, valant initalement 0. Lorsqu'on teste les valeurs de la variable suivante, on rappelle la fonction
 avec :code:`k+1` en paramètre : cette fonction est donc récursive. Mais avant d'être rappelée, elle fait appel à la 
 fonction :code:`consistance_avec_vars_precedentes` qui est au coeur du fonctionnement de l'algorithme. Elle passe en revue 
@@ -146,8 +146,8 @@ Afin de mieux comprendre l'algorithme de backtracking, prenons l'exemple du PSC 
 :numref:`reseau`. Tout d'abord, il s'agit d'instancier les différentes variables et contraintes :
 par exemple on a le code suivant pour la première variable : :code:`x1 = Variable("x1", ["b","c"])`, et pour la 
 contrainte entre la variable :code:`x1` et :code:`x2` on a ceci : :code:`c12 = Contrainte_binaire(x1,"!=",x2)`. Après 
-avoir ajouter toutes nos variables et contraintes dans les instances des classes :code:`Variables` et 
-:code:`Contraintes`, nous pouvons exécuter l'algorhitme de backtracking, représenté par la 
+avoir ajouter toutes nos variables et contraintes dans leurs listes respectives d'une instance de la classe :code:`PSC`, 
+nous pouvons exécuter l'algorithme de backtracking, représenté par la 
 pseudo-exécution suivante dans laquelle les assignations des valeurs solutions sont représentées 
 en jaune :
 
@@ -159,7 +159,7 @@ en jaune :
 Algorithme de forward checking
 =============================
 
-Il s'agit maintenant d'implémenter l'algorhitme de forward checking dont
+Il s'agit maintenant d'implémenter l'algorithme de forward checking dont
 la structure récursive est la même que pour le backtracking. A chaque
 niveau :code:`k`, on commence par définir la variable actuelle et par
 effectuer une copie des labels actuels dans la variable :code:`anciens_labels`
@@ -180,12 +180,12 @@ retourne :code:`False` et on s'arrête
 à jour les labels avec la variable :code:`anciens_labels` et la fonction
 :code:`met_a_jour_labels`. De plus, avant de réappeler le :code:`forward_checking`
 avec l'indice :code:`k+1`, on réorganise légèrement la liste des variables avec la 
-méthode :code:`dynamic_ordering` qui échange la variable d'indice `k+1` avec une
-variable avec le plus petit label afin d'effectuer l'algorhithme  de forward checking
-de l'étape suivante avec une variable la plus restrictive.
+méthode :code:`dynamic_ordering` qui échange la variable d'indice :code:`k+1` avec une
+variable avec le plus petit label afin d'effectuer l'algorithme  de forward checking
+de l'étape suivante avec une variable la plus restrictive possible.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 35-42, 184-196, 239-284
+    :lines: 35-42, 184-197, 239-284
     :linenos:
 
 Comme pour la méthode du retour-arrière, voici ci-dessous la pseudo-exécution
@@ -273,7 +273,7 @@ ont souvent déjà été ajoutées lors des appels de la fonction avec les ligne
     :lines:  345-362
     :linenos:
 
-Puis, la méthode:code:`creation_de_toutes_les_contraintes` génère l'ensemble des 
+Puis, la méthode :code:`creation_de_toutes_les_contraintes` génère l'ensemble des 
 contraintes en appelant d'abord la méthode :code:`creation_des_variables` pour  
 instancier les variables et créer la nouvelle grille contenant le nom de ces
 dernières, ainsi qu'en créant 
@@ -285,14 +285,14 @@ toutes les contraintes.
     :linenos:
 
 Finalement, il est l'heure de définir la méthode :code:`solution_sudoku` qui doit 
-être appelée après avoir créer une instance :code:`Sudokus_PSC` et qui résout donc
+être appelée après avoir créé une instance :code:`Sudokus_PSC` et qui résout donc
 toute grille de sudoku réalisable. En fait, lors de l'instanciation du PSC, on va déjà 
-vérifier que la grille contrôler que la grille de sudoku 
+vérifier que la grille de sudoku 
 est dans les normes avec la méthode :code:`grille_valide`, qui vérifie si chaque ligne
 a le même nombre d'éléments que la grille a de lignes. Puis, on crée les contraintes 
 avec :code:`creation_de_toutes_les_contraintes` et
-on appelle les 3 méthodes de pré-résolution code:`consistance_contraintes_unaires`,
-:code:`consistance_contraintes_binaires` et :code:`sort_variables`. La méthode 
+on appelle les 3 méthodes de pré-résolution :code:`consistance_noeuds`,
+:code:`consistance_arcs` et :code:`sort_variables`. La méthode 
 :code:`solution_sudoku` ne s'occupe que de résoudre le sudoku avec l'algorithme de
 backtracking ou de forward checking choisi en paramètre. Si la recherche a été fructueuse, on
 insère les valeurs valides des variables dans la grille et on l'imprime, sinon on 
@@ -300,5 +300,5 @@ imprime un message indiquant que le sudoku ne peut pas être résolu, ce qui sig
 qu'il n'a pas été généré correctement.
 
 ..  literalinclude:: scripts/algorithme_sudokus.py
-    :lines: 306-311, 374-388
+    :lines: 290-311, 374-388
     :linenos:

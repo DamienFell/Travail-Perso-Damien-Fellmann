@@ -2,7 +2,7 @@
 
 ..  only:: html
 
-    Références
+    Bibliographie et webographie
     ##########
 
 ..  only:: html

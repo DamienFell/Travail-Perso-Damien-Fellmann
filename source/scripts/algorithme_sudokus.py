@@ -32,7 +32,7 @@ class Contrainte(ABC):
     @abstractmethod
     def __repr__(self): 
         pass
-#Suite de la classe Contrainte_binaire    
+#Suite de la classe Contrainte  
     def propage(self, var):
         for val in var.label :
             if not self.est_valide(var,val):
@@ -165,19 +165,19 @@ class PSC :
             str += c.__repr__() + "\n"
         return str
 #Suite de la classe PSC        
-    def consistance_contraintes_unaires(self):
+    def consistance_noeuds(self):
         for c in self.contraintes_unaires:
             for val in c.refVar.label :
                 if not c.est_valide(c.refVar,val) :
                     c.refVar.label.remove(val)
 #Suite de la classe PSC     
-    def consistance_contraintes_binaires(self):
+    def consistance_arcs(self):
         refaire = False
         for c in self.contraintes_binaires:
             if c.modifier_labels():
                 refaire == True
         if refaire : 
-            self.consistance_des_arcs()
+            self.consistance_arcs()
 #Suite de la classe PSC
     def sort_variables(self):
         self.variables.sort(key=lambda var : len(var.label))
@@ -192,9 +192,9 @@ class PSC :
                 taille_min = len(self.variables[i].label)
                 
         if indice_plus_petit_label != k:
-            self.variables[k], self.variables[indice_plus_petit_label] = self.variables[indice_plus_petit_label], self.variables[k]
-            
-            
+            self.variables[k], self.variables[indice_plus_petit_label] = \
+            self.variables[indice_plus_petit_label], self.variables[k]
+                       
 #Suite de la classe PSC 
     def consistance_avec_vars_precedentes(self, k): 
         for c in self.contraintes_binaires :                                
@@ -298,12 +298,12 @@ class Sudokus_PSC(PSC):
         
         self.creation_de_toutes_les_contraintes()
         
-        self.consistance_contraintes_unaires()
+        self.consistance_noeuds()
         
-        self.consistance_contraintes_binaires()
+        self.consistance_arcs()
         
         self.sort_variables()
-#Suite de la classe Sudokus_PSC    
+
     def grille_valide(self):
         for ligne in self.grille :
             if not len(ligne) == len(self.grille):
@@ -347,7 +347,7 @@ class Sudokus_PSC(PSC):
         for ligne in grille :
             ligne2=ligne.copy()
             for x in ligne :
-                if not type(x) is int :
+                if not isinstance(x,int) :
                     var = self.retourne_var(x)
                     ligne2.remove(x)                                
                     for y in ligne2 :
@@ -390,13 +390,13 @@ class Sudokus_PSC(PSC):
 def lines_to_sudokus(lines):
     sudokus_grids = int(len(lines)/11) * [None] #Création de la liste contenant
                                                 #toutes les grilles
-    for i in range(int(len(lines)/11)):
-        grid =9*[None]
+    for i in range(int(len(lines)/11)):         #11 car il y a entre chaque grille
+        grid =9*[None]                          #deux retours à la ligne,
         for j in range(9):
-            grid[j]=list(lines[11*i+j])[:9]     #11*i car il y a entre chaque grille
-            for k in range(9):                  #deux retours à la ligne, et [:9] car
-                el = grid[j][k]                 #le dernier caractère de chaque ligne 
-                if el != ".":                   #est un "\n".
+            grid[j]=list(lines[11*i+j])[:9]     #[:9] car le dernier caractère de
+            for k in range(9):                  #chaque ligne est un "\n".
+                el = grid[j][k]                 
+                if el != ".":                   
                     grid[j][k] = int(el)
             
         sudokus_grids[i]=grid
@@ -415,7 +415,7 @@ def chronometre(lines):
         
         print(f"{end-start};{psc.iterations}")
      
-    print("-------------------------------------------------------------------------------") 
+    print("-------------------------------------------------------------") 
      
     for grid in grids:
         

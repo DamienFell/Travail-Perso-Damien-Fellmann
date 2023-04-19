@@ -78,18 +78,18 @@ entraîne un retour en arrière):
     :header: "Etape", ":math:`x_1`", ":math:`x_2`", ":math:`x_3`", ":math:`x_4`"
     :widths: 5, 10, 10, 10, 10
 
-    1, ":math:`b`", \-, \-, \-
-    2, ":math:`b`", ":math:`a`", \-, \-
-    3, ":math:`b`", ":math:`a`", ":math:`c`", \-
-    4, ":math:`b`", ":math:`a`", ":math:`c`", \*
-    5, ":math:`b`", ":math:`a`", \*, \-
-    6, ":math:`b`", ":math:`c`", \-, \-
-    7, ":math:`b`", ":math:`c`", \*, \-
-    8, ":math:`b`", \*, \-, \-
-    9, ":math:`c`", \-, \-, \-
-    10,":math:`c`", ":math:`a`", \-, \-
-    11,":math:`c`", ":math:`a`", ":math:`b`", \-
-    12,":math:`c`", ":math:`a`", ":math:`b`", ":math:`b`"
+    **1**, ":math:`b`", \-, \-, \-
+    **2**, ":math:`b`", ":math:`a`", \-, \-
+    **3**, ":math:`b`", ":math:`a`", ":math:`c`", \-
+    **4**, ":math:`b`", ":math:`a`", ":math:`c`", \*
+    **5**, ":math:`b`", ":math:`a`", \*, \-
+    **6**, ":math:`b`", ":math:`c`", \-, \-
+    **7**, ":math:`b`", ":math:`c`", \*, \-
+    **8**, ":math:`b`", \*, \-, \-
+    **9**, ":math:`c`", \-, \-, \-
+    **10**,":math:`c`", ":math:`a`", \-, \-
+    **11**,":math:`c`", ":math:`a`", ":math:`b`", \-
+    **12**,":math:`c`", ":math:`a`", ":math:`b`", ":math:`b`"
 
 Méthode du forward checking
 ....................
@@ -97,13 +97,13 @@ Méthode du forward checking
 A présent, il est possible d'améliorer notre recherche en profondeur d'abord grâce à la méthode du
 forward checking. Ce dernier permet d'éviter à l'avance d'assigner des valeurs inconsistantes, donc qui
 ne respectent pas leurs contraintes, aux variables pour lesquelles aucune valeur n'a été encore attribuée. 
-Pour y parvenir, nous créons pour chaque variable :math:`x_i` un label :math:`L_i` correspondant à un sous-ensemble de son domaine :
-:math:`L_i ⊂ D_i`. Les valeurs testées ne seront donc plus toutes les valeurs possibles des domaines mais toutes 
+Pour y parvenir, nous créons pour chaque variable :math:`x_i` un label :math:`l_i` correspondant à un sous-ensemble de son domaine :
+:math:`l_i ⊂ d_i`. Les valeurs testées ne seront donc plus toutes les valeurs possibles des domaines mais toutes 
 les valeurs possibles des labels actuels. Par conséquent, à chaque nouvelle affectation de valeur pour une variable
 :math:`x_i`, on met à jour les labels des variables :math:`x_j` avec :math:`j>i` : on élimine toutes les valeurs inconsistantes
 par rapport aux valeurs déjà attribuées de leurs labels respectifs. A chaque fois qu'un label d'une variable dont la valeur n'a pas
 encore été attribuée est vide, il faut tester une autre valeur pour la variable actuelle
-ou faire un retour en arrière si son label est également vide. Dans ces cas-là, on met également 
+ou faire un retour en arrière si son label est également vide. Dans ces cas-là, on remet également 
 à jour les labels avec des sauvegardes qu'on a effectuées avant l'affectation de chaque valeur.
 
 Voici ci-dessous la résolution du PSC de la :numref:`reseau` grâce à la méthode 
@@ -132,15 +132,15 @@ Méthodes de pré-résolution
 
 Les deux algorithmes présentés précédemment sont efficaces mais peuvent 
 quand même s'exécuter avec un très grand nombre d'itérations qui peut être
-réduit s'il on applique d'autres algorhithmes avant leur utilisation
+réduit si l'on applique d'autres algorithmes avant leur utilisation
 
 Consistance des noeuds
 ,,,,,
 
 Tout d'abord, on peut réduire la taille des labels des 
 variables en éliminant toutes leurs valeurs inconsistantes par rapport aux 
-variables unaires, si bien qu'après cette étape, il n'y aura plus besoin 
-d'utiliser les contraintres unaires dans les autres algorhithmes car elles 
+contraintes unaires, si bien qu'après cette étape, il n'y aura plus besoin 
+d'utiliser les contraintres unaires dans les autres algorithmes car elles 
 seront en quelque sorte déjà intégrées dans les labels réduits 
 des variables. On appelle ce principe la consistance des noeuds.
 
@@ -157,7 +157,7 @@ Afin de mieux comprendre, imaginons un PSC dans lequel il existe une contrainte
 binaire entre une variable :math:`x_1` avec son domaine :math:`d_1 = \{ a,d,g,h \}`
 et une variable :math:`x_2` avec son domaine :math:`d_2 = \{ b,c,d,e,g \}`, qui leur 
 impose d'avoir la même valeur. On décide de leur appliquer la méthode présentée 
-ci-dessus et on s'apperçoit qu'à la fin, les deux labels sont égaux, ce qui correspond
+ci-dessus et on s'apperçoit qu'à la fin, les deux labels sont les mêmes, ce qui correspond
 à ce que dicte la contrainte :
 
 ..  csv-table:: Exemple de la consistance par rapport aux contraintes binaires
@@ -176,20 +176,20 @@ ci-dessus et on s'apperçoit qu'à la fin, les deux labels sont égaux, ce qui c
 
 Cependant, après avoir passé en revue toutes les contraintes, il est également nécessaire de 
 réeffectuer le même processus car certaines réductions des labels affectent aussi les autres variables
-auxquelles est liée chaque variable. La consistance par rapport aux contraintes binaires est donc 
-atteinte seulement quand l'algorhithme n'a plus aucun effet sur les labels.
+auxquelles est liée chaque variable. La consistance des arcs est donc 
+atteinte seulement quand l'algorithme n'a plus aucun effet sur les labels.
 
 Tri des variable
 ,,,,,,,,,,,,,,,
 
 Puis, maintenant que la taille des labels a diminué, on peut mettre dans l'ordre
-la liste des variables car elle influence la rapidité des algorhithmes de backtracking
-ou de forward checking. En effet, la profondeur de l'arbre de rechercher est 
+la liste des variables car elle influence la rapidité des algorithmes de backtracking
+ou de forward checking. En effet, la profondeur de l'arbre de recherche est 
 déterminée à chaque étape par la variable actuelle. On va donc trier les variables
 de manière à tester les valeurs des variables avec les labels les plus petits 
-d'abord : celles-ci sont les plus resttictives parce qu'ayant moins de valeurs
+d'abord : celles-ci sont les plus restrictives parce qu'ayant moins de valeurs
 possibles, elles ont le plus de chances d'aboutir à des inconsistances.
 
-En plus d'effectuer un tri avant de débuter les algorhithmes de résolution, on peut
+En plus d'effectuer un tri avant de débuter les algorithmes de résolution, on peut
 aussi effectuer des tris pendant la résolution pour prendre à chaque étape la 
 variable avec le plus petit label.

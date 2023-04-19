@@ -11,7 +11,7 @@ fonctionnement de l'algorithme de retour-arrière basé sur la recherche en
 profonder d'abord dans un arbre de recherche où l'on assigne les valeurs
 aux variables les unes après les autres. Le principe du forward checking
 a lui aussi été décrit : cette méthode de résolution se base sur la propagation
-des assignations de valeur aux variables non encore instanciées. Elle permet
+des assignations de valeurs aux variables non encore instanciées. Elle permet
 de réduire la taille des domaines au cours de la résolution à travers les sous-ensembles
 des domaines, les labels. Les algorithmes secondaires comme la consistance des
 arcs et des noeuds, qui permet de supprimer à l'avance
@@ -21,8 +21,8 @@ des labels ont également été évoqués.
 
 Dans la deuxième section, on a appliqué cette théorie dans un programme informatique
 en python en s'aidant notamment de fonctions récursives pour les algorithmes
-de backtracking et de forward checking. Il a fallu ensuite transformer un 
-jeu de sudoku en un problème de satisfaction de contraintes : toutes les cases
+de backtracking et de forward checking. Il a fallu ensuite transformer le 
+jeu du sudoku en un problème de satisfaction de contraintes : toutes les cases
 vides constituent les variables et celles-ci sont rattachées entre elles et 
 par rapport aux cases auxquelles un nombre est déjà attribué à des
 contraintes d'inégalité. En rassemblant toutes ces parties de codes ensemble,

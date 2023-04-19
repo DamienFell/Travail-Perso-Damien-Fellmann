@@ -19,8 +19,8 @@ de coder un programme informatique capable de trouver
 une solution pour chaque grille de sudoku.
 
 Ce travail personnel a donc pour but de parvenir à
-coder un tel programme. Et pour y parvenir, comme les règles des sudokus
-sont en fait des contraintes s'appliquant sur chaque case, le paradigme de
+coder un tel programme. Pour y parvenir, comme les règles des sudokus
+constituent des contraintes s'appliquant sur chaque case, le paradigme de
 programmation utilisé sera celui de la programmation par contraintes.
 Cela me permettra de découvrir une nouvelle manière de conceptualiser
 un problème informatique de manière théorique et d'ensuite appliquer
