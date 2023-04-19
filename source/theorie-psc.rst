@@ -53,16 +53,18 @@ les variables jusqu'à trouver celles respectant toutes les contraintes.
 Méthode du retour-arrière / backtracking
 ....................
 
+.. figure:: Arbre_profondeur.png
+    :figwidth: 50%
+    :align: right
+
+    Graphe d'une recherche en profondeur
+
 Dans ce travail, nous nous intéresserons uniquement aux méthodes basées
 sur la recherche en profondeur d'abord, aussi appelée retour-arrière ou 
 backtracking : dans un 
 schéma arborescent, on explore chaque branche jusqu'au bout avant de remonter et d'explorer les
 autres branches. Dans la figure 2, on commence par le noeud A et on explore ensuite les autres noeuds, 
 les noeuds fils, en descendant, puis en remontant dans l'arbre jusqu'à tomber sur la solution au noeud I.
-
-.. figure:: Arbre_profondeur.png
-    
-    Graphe d'une recherche en profondeur
 
 Dans un problème de satisfaction de contraintes, la profondeur des nœuds correspond au nombre de
 variables satisfaisant les contraintes : on commence par tester et par attribuer une valeur pour une variable et on
